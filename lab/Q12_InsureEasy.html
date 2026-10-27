@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsureEasy Insurance Management</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛡️ InsureEasy</h1>
+  <p>Insurance policies made simple</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="customer">Customer</option>
+    <option value="agent">Agent</option>
+    <option value="admin">Admin</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="hide('loginBox'); show('registerBox')">Agent Registration</button>
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Agent: agent / 1234<br>Customer: customer / 1234</div>
+</div>
+
+<!-- Agent registration -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Agent Registration</h2>
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="regPhone" placeholder="Phone number"><br>
+  <input type="text" id="regEmail" placeholder="Email"><br>
+  <button onclick="registerAgent()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+<!-- Customer dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>👤 Customer Dashboard</h2>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uPolicies')">📋 My Policies</button>
+    <button onclick="openTab('userBox','uCompare')">⚖️ Compare Plans</button>
+    <button onclick="openTab('userBox','uAlerts')">🔔 SMS Alerts</button>
+  </nav>
+
+  <div id="uPolicies" class="tab">
+    <h3>My Policy Details</h3>
+    <table id="myPolicyTable"></table>
+    <h3>My Claims</h3>
+    <table id="myClaimTable"></table>
+  </div>
+
+  <div id="uCompare" class="tab hidden">
+    <h3>Compare Insurance Plans (tick two or more)</h3>
+    <table id="planTable"></table>
+    <button onclick="comparePlans()">Compare Selected</button>
+    <div id="compareBox"></div>
+  </div>
+
+  <div id="uAlerts" class="tab hidden">
+    <h3>SMS Alerts</h3>
+    <table id="myAlertTable"></table>
+  </div>
+</div>
+
+<!-- Agent dashboard -->
+<div id="agentBox" class="box hidden">
+  <h2>🧑‍💼 Agent Dashboard</h2>
+  <div class="stats" id="agentStats"></div>
+  <nav>
+    <button onclick="openTab('agentBox','gCustomers')">👥 Customers</button>
+    <button onclick="openTab('agentBox','gPolicies')">📑 Policies</button>
+    <button onclick="openTab('agentBox','gClaims')">🧾 Claims</button>
+    <button onclick="openTab('agentBox','gAlerts')">🔔 SMS Alerts</button>
+  </nav>
+
+  <div id="gCustomers" class="tab">
+    <h3 id="custFormTitle">Create Customer</h3>
+    <input type="text" id="cName" placeholder="Customer name">
+    <input type="text" id="cUser" placeholder="Username">
+    <input type="password" id="cPass" placeholder="Password">
+    <input type="text" id="cPhone" placeholder="Phone">
+    <input type="text" id="cEmail" placeholder="Email">
+    <button onclick="saveCustomer()">Save Customer</button>
+    <button onclick="clearCustomerForm()">Clear</button>
+    <p class="msg" id="custMsg"></p>
+    <table id="customerTable"></table>
+  </div>
+
+  <div id="gPolicies" class="tab hidden">
+    <h3>Create Policy</h3>
+    <select id="pCustomer"></select>
+    <select id="pPlan" style="width:300px"></select>
+    <input type="date" id="pStart" style="width:160px">
+    <button onclick="createPolicy()">Create Policy</button>
+    <p class="msg" id="policyMsg"></p>
+    <table id="agentPolicyTable"></table>
+  </div>
+
+  <div id="gClaims" class="tab hidden">
+    <h3>Customer Claims</h3>
+    <table id="claimTable"></table>
+  </div>
+
+  <div id="gAlerts" class="tab hidden">
+    <h3>Send SMS Alerts</h3>
+    <button onclick="sendDueAlerts()">Send Alerts for Premiums Due in 7 Days or Overdue</button>
+    <h3>Alerts Sent</h3>
+    <table id="sentAlertTable"></table>
+  </div>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Admin Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aApprove')">✅ Approve Agents</button>
+    <button onclick="openTab('adminBox','aAgents')">🧑‍💼 All Agent Details</button>
+  </nav>
+
+  <div id="aApprove" class="tab">
+    <h3>Agents Waiting for Approval</h3>
+    <table id="pendingTable"></table>
+  </div>
+
+  <div id="aAgents" class="tab hidden">
+    <h3>Agent Details</h3>
+    <table id="agentTable"></table>
+  </div>
+</div>
+
+</main>
+
+<footer>© 2026 InsureEasy | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "System Admin", username: "admin", password: "admin123", role: "admin", phone: "", email: "" },
+    { name: "Arun Agent", username: "agent", password: "1234", role: "agent", phone: "9840012345", email: "arun@insureeasy.com", status: "Approved" },
+    { name: "Test Customer", username: "customer", password: "1234", role: "customer", phone: "9876543210", email: "customer@mail.com", agent: "agent" }
+  ];
+
+  var plans = [
+    { id: 1, type: "Health", name: "Family Health Shield", premium: 12000, cover: 500000, term: "1 year", features: "Cashless hospitals, maternity cover" },
+    { id: 2, type: "Health", name: "Senior Care Plus", premium: 18000, cover: 800000, term: "1 year", features: "Pre existing diseases covered, free check-up" },
+    { id: 3, type: "Auto", name: "Car Comprehensive", premium: 9500, cover: 600000, term: "1 year", features: "Own damage, third party, roadside help" },
+    { id: 4, type: "Home", name: "Home Secure", premium: 5000, cover: 2500000, term: "1 year", features: "Fire, theft and flood cover" },
+    { id: 5, type: "Life", name: "Term Life Cover", premium: 15000, cover: 10000000, term: "20 years", features: "Death benefit, tax savings" }
+  ];
+
+  var policies = [];
+  var claims = [];
+  var alerts = [];
+  var nextPolicyId = 1001;
+  var nextClaimId = 1;
+  var currentUser = null;
+  var editCustomer = "";
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function addDays(dateStr, n) {
+    var d = new Date(dateStr);
+    d.setDate(d.getDate() + n);
+    return d.toISOString().split("T")[0];
+  }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function policyStatus(p) {
+    return p.dueDate < today() ? "Premium Overdue" : "Active";
+  }
+
+  function statusBadge(s) {
+    var color = s == "Active" || s == "Approved" ? "green" : (s == "Pending" ? "orange" : "red");
+    return "<span class='badge " + color + "'>" + s + "</span>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      showPending();
+      showAgentDetails();
+    } else if (currentUser.role == "agent") {
+      showAgentStats();
+      showCustomers();
+      fillPolicyLists();
+      showAgentPolicies();
+      showClaims();
+      showSentAlerts();
+    } else {
+      showUserStats();
+      showMyPolicies();
+      showMyClaims();
+      showPlans();
+      showMyAlerts();
+    }
+  }
+
+  // ---------- Login / Agent registration ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        if (r == "agent" && users[i].status != "Approved") {
+          el("loginMsg").innerText = users[i].status == "Rejected" ? "Your registration was rejected by the admin" : "Your account is waiting for admin approval";
+          return;
+        }
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        if (r == "admin") {
+          show("adminBox");
+          openTab("adminBox", "aApprove");
+        } else if (r == "agent") {
+          el("pCustomer").innerHTML = "";
+          el("pStart").value = today();
+          show("agentBox");
+          openTab("agentBox", "gCustomers");
+        } else {
+          show("userBox");
+          openTab("userBox", "uPolicies");
+        }
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function registerAgent() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "" || el("regEmail").value == "") {
+      el("regMsg").innerText = "Please fill name, username, password and email";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    users.push({ name: name, username: user, password: pass, role: "agent", phone: el("regPhone").value, email: el("regEmail").value, status: "Pending" });
+    alert("Registration sent. You can login after the admin approves your account.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    hide("adminBox");
+    hide("agentBox");
+    hide("userBox");
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+  // ---------- Admin ----------
+  function showAdminStats() {
+    var agents = 0, pending = 0, customers = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "agent") {
+        if (users[i].status == "Approved") agents++;
+        if (users[i].status == "Pending") pending++;
+      }
+      if (users[i].role == "customer") customers++;
+    }
+    el("adminStats").innerHTML = statBox("s1", agents, "Approved Agents") + statBox("s4", pending, "Waiting Approval") +
+      statBox("s2", customers, "Customers") + statBox("s3", policies.length, "Policies");
+  }
+
+  function showPending() {
+    var html = "<tr><th>Name</th><th>Username</th><th>Phone</th><th>Email</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "agent" && users[i].status == "Pending") {
+        html += "<tr><td>" + users[i].name + "</td><td>" + users[i].username + "</td><td>" + users[i].phone + "</td><td>" + users[i].email +
+          "</td><td><button onclick='setAgentStatus(\"" + users[i].username + "\", \"Approved\")'>Approve</button>" +
+          "<button onclick='setAgentStatus(\"" + users[i].username + "\", \"Rejected\")'>Reject</button></td></tr>";
+      }
+    }
+    el("pendingTable").innerHTML = html;
+  }
+
+  function setAgentStatus(username, status) {
+    findUser(username).status = status;
+    refresh();
+  }
+
+  function agentCommission(username) {
+    var total = 0;
+    for (var i = 0; i < policies.length; i++) {
+      if (policies[i].agent == username) total += policies[i].paid;
+    }
+    return Math.round(total * 0.1);
+  }
+
+  function showAgentDetails() {
+    var html = "<tr><th>Agent</th><th>Phone</th><th>Email</th><th>Status</th><th>Customers</th><th>Policies</th><th>Commission (10%)</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var a = users[i];
+      if (a.role == "agent") {
+        var customers = 0, count = 0;
+        for (var j = 0; j < users.length; j++) {
+          if (users[j].role == "customer" && users[j].agent == a.username) customers++;
+        }
+        for (var k = 0; k < policies.length; k++) {
+          if (policies[k].agent == a.username) count++;
+        }
+        html += "<tr><td>" + a.name + "<br><small>" + a.username + "</small></td><td>" + a.phone + "</td><td>" + a.email + "</td><td>" + statusBadge(a.status) +
+          "</td><td>" + customers + "</td><td>" + count + "</td><td>" + money(agentCommission(a.username)) + "</td></tr>";
+      }
+    }
+    el("agentTable").innerHTML = html;
+  }
+
+  // ---------- Agent: customers ----------
+  function showAgentStats() {
+    var customers = 0, mine = 0, due = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "customer" && users[i].agent == currentUser.username) customers++;
+    }
+    for (var j = 0; j < policies.length; j++) {
+      if (policies[j].agent == currentUser.username) {
+        mine++;
+        if (policyStatus(policies[j]) != "Active") due++;
+      }
+    }
+    el("agentStats").innerHTML = statBox("s1", customers, "My Customers") + statBox("s2", mine, "Policies") +
+      statBox("s4", due, "Premium Overdue") + statBox("s3", money(agentCommission(currentUser.username)), "Commission");
+  }
+
+  function saveCustomer() {
+    var name = el("cName").value;
+    var user = el("cUser").value;
+    var pass = el("cPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("custMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (editCustomer == "") {
+      if (findUser(user)) {
+        el("custMsg").innerText = "Username already exists";
+        return;
+      }
+      users.push({ name: name, username: user, password: pass, role: "customer", phone: el("cPhone").value, email: el("cEmail").value, agent: currentUser.username });
+    } else {
+      var c = findUser(editCustomer);
+      c.name = name;
+      c.password = pass;
+      c.phone = el("cPhone").value;
+      c.email = el("cEmail").value;
+    }
+    clearCustomerForm();
+    refresh();
+  }
+
+  function clearCustomerForm() {
+    var ids = ["cName", "cUser", "cPass", "cPhone", "cEmail"];
+    for (var i = 0; i < ids.length; i++) el(ids[i]).value = "";
+    el("cUser").disabled = false;
+    editCustomer = "";
+    el("custMsg").innerText = "";
+    el("custFormTitle").innerText = "Create Customer";
+  }
+
+  function showCustomers() {
+    var html = "<tr><th>Name</th><th>Username</th><th>Phone</th><th>Email</th><th>Policies</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var c = users[i];
+      if (c.role == "customer" && c.agent == currentUser.username) {
+        var count = 0;
+        for (var j = 0; j < policies.length; j++) {
+          if (policies[j].customer == c.username) count++;
+        }
+        html += "<tr><td>" + c.name + "</td><td>" + c.username + "</td><td>" + c.phone + "</td><td>" + c.email + "</td><td>" + count +
+          "</td><td><button onclick='editCustomerForm(\"" + c.username + "\")'>Edit</button><button onclick='deleteCustomer(\"" + c.username + "\")'>Delete</button></td></tr>";
+      }
+    }
+    el("customerTable").innerHTML = html;
+  }
+
+  function editCustomerForm(username) {
+    var c = findUser(username);
+    editCustomer = username;
+    el("cName").value = c.name;
+    el("cUser").value = c.username;
+    el("cUser").disabled = true;
+    el("cPass").value = c.password;
+    el("cPhone").value = c.phone;
+    el("cEmail").value = c.email;
+    el("custFormTitle").innerText = "Update Customer: " + c.name;
+  }
+
+  function deleteCustomer(username) {
+    if (!confirm("Delete this customer and the policies?")) return;
+    users.splice(users.indexOf(findUser(username)), 1);
+    for (var i = policies.length - 1; i >= 0; i--) {
+      if (policies[i].customer == username) policies.splice(i, 1);
+    }
+    refresh();
+  }
+
+  // ---------- Agent: policies ----------
+  function fillPolicyLists() {
+    var c = "", count = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "customer" && users[i].agent == currentUser.username) {
+        c += "<option value='" + users[i].username + "'>" + users[i].name + "</option>";
+        count++;
+      }
+    }
+    if (el("pCustomer").options.length != count) el("pCustomer").innerHTML = c;
+    if (el("pPlan").options.length != plans.length) {
+      var p = "";
+      for (var j = 0; j < plans.length; j++) p += "<option value='" + plans[j].id + "'>" + plans[j].type + " - " + plans[j].name + " (" + money(plans[j].premium) + ")</option>";
+      el("pPlan").innerHTML = p;
+    }
+  }
+
+  function createPolicy() {
+    var customer = el("pCustomer").value;
+    var start = el("pStart").value;
+    if (customer == "" || start == "") {
+      el("policyMsg").innerText = "Choose a customer and a start date";
+      return;
+    }
+    var plan = findById(plans, el("pPlan").value);
+    policies.push({
+      id: nextPolicyId++, customer: customer, agent: currentUser.username, planId: plan.id,
+      startDate: start, dueDate: addDays(start, 365), paid: plan.premium
+    });
+    el("policyMsg").innerText = "";
+    alert("Policy " + (nextPolicyId - 1) + " created. First premium of " + money(plan.premium) + " received.");
+    refresh();
+  }
+
+  function showAgentPolicies() {
+    var html = "<tr><th>Policy</th><th>Customer</th><th>Plan</th><th>Start</th><th>Premium Due</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < policies.length; i++) {
+      var p = policies[i];
+      if (p.agent == currentUser.username) {
+        var plan = findById(plans, p.planId);
+        html += "<tr><td>#" + p.id + "</td><td>" + findUser(p.customer).name + "</td><td>" + plan.name + "<br><small>" + plan.type + " | cover " + money(plan.cover) + "</small></td><td>" + p.startDate +
+          "</td><td>" + p.dueDate + "</td><td>" + statusBadge(policyStatus(p)) + "</td><td><button onclick='editDueDate(" + p.id + ")'>Edit</button>" +
+          "<button onclick='sendAlert(" + p.id + ")'>SMS</button><button onclick='deletePolicy(" + p.id + ")'>Delete</button></td></tr>";
+      }
+    }
+    el("agentPolicyTable").innerHTML = html;
+  }
+
+  function editDueDate(id) {
+    var p = findById(policies, id);
+    var date = prompt("New premium due date (YYYY-MM-DD)", p.dueDate);
+    if (!date) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      alert("Enter the date as YYYY-MM-DD");
+      return;
+    }
+    p.dueDate = date;
+    refresh();
+  }
+
+  function deletePolicy(id) {
+    if (!confirm("Delete this policy?")) return;
+    policies.splice(policies.indexOf(findById(policies, id)), 1);
+    refresh();
+  }
+
+  // ---------- SMS alerts ----------
+  function sendAlert(id) {
+    var p = findById(policies, id);
+    var customer = findUser(p.customer);
+    var plan = findById(plans, p.planId);
+    var text = p.dueDate < today()
+      ? "Dear " + customer.name + ", the premium of " + money(plan.premium) + " for policy #" + p.id + " was due on " + p.dueDate + ". Please pay now to keep your cover."
+      : "Dear " + customer.name + ", the premium of " + money(plan.premium) + " for policy #" + p.id + " is due on " + p.dueDate + ".";
+    alerts.push({ customer: p.customer, agent: currentUser.username, text: text, date: today(), phone: customer.phone });
+    alert("SMS sent to " + customer.phone + ":\n" + text);
+    refresh();
+  }
+
+  function sendDueAlerts() {
+    var count = 0;
+    for (var i = 0; i < policies.length; i++) {
+      var p = policies[i];
+      if (p.agent == currentUser.username && p.dueDate <= addDays(today(), 7)) {
+        var customer = findUser(p.customer);
+        alerts.push({
+          customer: p.customer, agent: currentUser.username, date: today(), phone: customer.phone,
+          text: "Dear " + customer.name + ", your premium for policy #" + p.id + " is due on " + p.dueDate + ". Please pay on time."
+        });
+        count++;
+      }
+    }
+    alert(count + " SMS alert(s) sent");
+    refresh();
+  }
+
+  function showSentAlerts() {
+    var html = "<tr><th>Date</th><th>Customer</th><th>Phone</th><th>Message</th></tr>";
+    for (var i = alerts.length - 1; i >= 0; i--) {
+      if (alerts[i].agent == currentUser.username) {
+        html += "<tr><td>" + alerts[i].date + "</td><td>" + findUser(alerts[i].customer).name + "</td><td>" + alerts[i].phone + "</td><td>" + alerts[i].text + "</td></tr>";
+      }
+    }
+    el("sentAlertTable").innerHTML = html;
+  }
+
+  // ---------- Agent: claims ----------
+  function showClaims() {
+    var html = "<tr><th>Claim</th><th>Customer</th><th>Policy</th><th>Amount</th><th>Reason</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < claims.length; i++) {
+      var c = claims[i];
+      var p = findById(policies, c.policyId);
+      if (p.agent == currentUser.username) {
+        html += "<tr><td>#" + c.id + "</td><td>" + findUser(c.customer).name + "</td><td>#" + p.id + "</td><td>" + money(c.amount) + "</td><td>" + c.reason + "</td><td>" + statusBadge(c.status) + "</td><td>";
+        if (c.status == "Pending") html += "<button onclick='setClaim(" + c.id + ", \"Approved\")'>Approve</button><button onclick='setClaim(" + c.id + ", \"Rejected\")'>Reject</button>";
+        html += "</td></tr>";
+      }
+    }
+    el("claimTable").innerHTML = html;
+  }
+
+  function setClaim(id, status) {
+    findById(claims, id).status = status;
+    refresh();
+  }
+
+  // ---------- Customer ----------
+  function showUserStats() {
+    var count = 0, due = 0, cover = 0;
+    for (var i = 0; i < policies.length; i++) {
+      if (policies[i].customer == currentUser.username) {
+        count++;
+        cover += findById(plans, policies[i].planId).cover;
+        if (policyStatus(policies[i]) != "Active") due++;
+      }
+    }
+    el("userStats").innerHTML = statBox("s1", count, "My Policies") + statBox("s4", due, "Premium Overdue") + statBox("s2", money(cover), "Total Cover");
+  }
+
+  function showMyPolicies() {
+    var html = "<tr><th>Policy</th><th>Plan</th><th>Premium</th><th>Cover</th><th>Next Due Date</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < policies.length; i++) {
+      var p = policies[i];
+      if (p.customer == currentUser.username) {
+        var plan = findById(plans, p.planId);
+        html += "<tr><td>#" + p.id + "</td><td>" + plan.name + "<br><small>" + plan.type + "</small></td><td>" + money(plan.premium) + "</td><td>" + money(plan.cover) + "</td><td>" + p.dueDate +
+          "</td><td>" + statusBadge(policyStatus(p)) + "</td><td><button onclick='payPremium(" + p.id + ")'>Pay / Renew</button><button onclick='fileClaim(" + p.id + ")'>Claim</button></td></tr>";
+      }
+    }
+    el("myPolicyTable").innerHTML = html;
+  }
+
+  function payPremium(id) {
+    var p = findById(policies, id);
+    var plan = findById(plans, p.planId);
+    if (!confirm("Pay " + money(plan.premium) + " to renew the policy for one more year?")) return;
+    // renewal starts from the due date, or from today if the policy is overdue
+    var from = p.dueDate < today() ? today() : p.dueDate;
+    p.dueDate = addDays(from, 365);
+    p.paid += plan.premium;
+    alert("Premium paid. Next due date: " + p.dueDate);
+    refresh();
+  }
+
+  function fileClaim(id) {
+    var p = findById(policies, id);
+    var plan = findById(plans, p.planId);
+    if (policyStatus(p) != "Active") {
+      alert("Claims cannot be made while the premium is overdue. Please renew the policy first.");
+      return;
+    }
+    var amount = parseInt(prompt("Claim amount (maximum " + plan.cover + ")"));
+    if (isNaN(amount) || amount <= 0 || amount > plan.cover) {
+      alert("Enter a valid claim amount");
+      return;
+    }
+    var reason = prompt("Reason for the claim");
+    if (!reason) return;
+    claims.push({ id: nextClaimId++, policyId: id, customer: currentUser.username, amount: amount, reason: reason, status: "Pending" });
+    alert("Claim submitted to your agent");
+    refresh();
+  }
+
+  function showMyClaims() {
+    var html = "<tr><th>Claim</th><th>Policy</th><th>Amount</th><th>Reason</th><th>Status</th></tr>";
+    for (var i = 0; i < claims.length; i++) {
+      if (claims[i].customer == currentUser.username) {
+        html += "<tr><td>#" + claims[i].id + "</td><td>#" + claims[i].policyId + "</td><td>" + money(claims[i].amount) + "</td><td>" + claims[i].reason + "</td><td>" + statusBadge(claims[i].status) + "</td></tr>";
+      }
+    }
+    el("myClaimTable").innerHTML = html;
+  }
+
+  function showMyAlerts() {
+    var html = "<tr><th>Date</th><th>Message</th></tr>";
+    for (var i = alerts.length - 1; i >= 0; i--) {
+      if (alerts[i].customer == currentUser.username) html += "<tr><td>" + alerts[i].date + "</td><td>📱 " + alerts[i].text + "</td></tr>";
+    }
+    el("myAlertTable").innerHTML = html;
+  }
+
+  // plan comparison
+  function showPlans() {
+    if (el("planTable").rows.length > 0) return;
+    var html = "<tr><th>Select</th><th>Type</th><th>Plan</th><th>Premium</th><th>Cover</th><th>Term</th></tr>";
+    for (var i = 0; i < plans.length; i++) {
+      html += "<tr><td><input type='checkbox' class='cmp' value='" + plans[i].id + "' style='width:auto'></td><td>" + plans[i].type + "</td><td>" + plans[i].name +
+        "</td><td>" + money(plans[i].premium) + "</td><td>" + money(plans[i].cover) + "</td><td>" + plans[i].term + "</td></tr>";
+    }
+    el("planTable").innerHTML = html;
+  }
+
+  function comparePlans() {
+    var picked = [];
+    var boxes = document.getElementsByClassName("cmp");
+    for (var i = 0; i < boxes.length; i++) {
+      if (boxes[i].checked) picked.push(findById(plans, boxes[i].value));
+    }
+    if (picked.length < 2) {
+      alert("Select at least two plans to compare");
+      return;
+    }
+    var rows = [["Type", "type"], ["Premium / year", "premium"], ["Cover amount", "cover"], ["Term", "term"], ["Features", "features"]];
+    var html = "<table><tr><th>Feature</th>";
+    for (var p = 0; p < picked.length; p++) html += "<th>" + picked[p].name + "</th>";
+    html += "</tr>";
+    for (var r = 0; r < rows.length; r++) {
+      html += "<tr><td><b>" + rows[r][0] + "</b></td>";
+      for (var q = 0; q < picked.length; q++) {
+        var v = picked[q][rows[r][1]];
+        html += "<td>" + (typeof v == "number" ? money(v) : v) + "</td>";
+      }
+      html += "</tr>";
+    }
+    el("compareBox").innerHTML = html + "</table>";
+  }
+</script>
+
+</body>
+</html>

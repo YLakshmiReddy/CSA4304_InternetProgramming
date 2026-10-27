@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoteOnline E-Voting System</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗳️ VoteOnline</h1>
+  <p>Secure online voting with OTP verification</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="voter">Voter</option>
+    <option value="admin">Admin</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Voter ID / Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Voter ID: V1001 / 1234 (also V1002, V1003)</div>
+</div>
+
+<!-- Register -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Register</h2>
+
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+
+  <button onclick="register()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+
+<!-- OTP login verification -->
+<div id="otpBox" class="box hidden">
+  <div class="icon">📱</div>
+  <h2>OTP Login Verification</h2>
+  <p id="otpInfo" class="info"></p>
+  <input type="text" id="otpInput" placeholder="Enter the 6 digit OTP" maxlength="6"><br>
+  <button onclick="verifyLoginOtp()">Verify OTP</button>
+  <button onclick="sendLoginOtp()">Resend OTP</button>
+  <p class="msg" id="otpMsg"></p>
+</div>
+
+<!-- Voter dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>🗳️ Voter Dashboard</h2>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uElections')">🏛️ Elections</button>
+    <button onclick="openTab('userBox','uVote')">☑️ Cast Vote</button>
+    <button onclick="openTab('userBox','uReceipts')">🧾 My Votes</button>
+  </nav>
+
+  <div id="uElections" class="tab">
+    <h3>Elections for My Ward</h3>
+    <table id="electionTable"></table>
+  </div>
+
+  <div id="uVote" class="tab hidden">
+    <h3 id="voteTitle">Select an election first</h3>
+    <div id="candidateList"></div>
+    <div id="voteOtpBox" class="hidden">
+      <button onclick="getVoteOtp()">Get OTP for Voting</button>
+      <input type="text" id="voteOtp" placeholder="Enter voting OTP" maxlength="6" style="width:200px">
+      <button onclick="submitVote()">Submit Vote</button>
+    </div>
+    <p class="msg" id="voteMsg"></p>
+  </div>
+
+  <div id="uReceipts" class="tab hidden">
+    <h3>My Voting Receipts</h3>
+    <table id="receiptTable"></table>
+  </div>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Election Admin Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aElections')">🏛️ Elections</button>
+    <button onclick="openTab('adminBox','aCandidates')">🧑‍💼 Candidates</button>
+    <button onclick="openTab('adminBox','aWards')">🏘️ Wards</button>
+    <button onclick="openTab('adminBox','aVoters')">👥 Voter List</button>
+    <button onclick="openTab('adminBox','aResults')">📊 Results</button>
+  </nav>
+
+  <div id="aElections" class="tab">
+    <h3>Create Election</h3>
+    <input type="text" id="eName" placeholder="Election name" style="width:300px">
+    <input type="date" id="eDate" style="width:160px">
+    <button onclick="addElection()">Create Election</button>
+    <table id="adminElectionTable"></table>
+  </div>
+
+  <div id="aCandidates" class="tab hidden">
+    <h3>Create Candidate and Allocate to Election</h3>
+    <input type="text" id="cName" placeholder="Candidate name">
+    <input type="text" id="cParty" placeholder="Party">
+    <input type="text" id="cSymbol" placeholder="Symbol (emoji)" style="width:130px">
+    <select id="cElection" style="width:240px"></select>
+    <select id="cWard" style="width:140px"></select>
+    <button onclick="addCandidate()">Add Candidate</button>
+    <p class="msg" id="candMsg"></p>
+    <table id="candidateTable"></table>
+  </div>
+
+  <div id="aWards" class="tab hidden">
+    <h3>Allocate Voters to Election Wards</h3>
+    <select id="wVoter" style="width:260px"></select>
+    <select id="wWard" style="width:140px"></select>
+    <button onclick="allocateVoter()">Allocate</button><br>
+    <input type="text" id="newWard" placeholder="New ward name" style="width:180px">
+    <button onclick="addWard()">Add Ward</button>
+    <table id="wardTable"></table>
+  </div>
+
+  <div id="aVoters" class="tab hidden">
+    <h3 id="voterFormTitle">Create Voter</h3>
+    <input type="text" id="vId" placeholder="Voter ID">
+    <input type="text" id="vName" placeholder="Name">
+    <input type="text" id="vPhone" placeholder="Phone">
+    <select id="vWard" style="width:140px"></select>
+    <input type="password" id="vPass" placeholder="Password" value="1234" style="width:140px">
+    <button onclick="saveVoter()">Save Voter</button>
+    <button onclick="clearVoterForm()">Clear</button>
+    <p class="msg" id="voterMsg"></p>
+    <h3>Import Voter List</h3>
+    <textarea id="importText" rows="3" placeholder="One voter per line:  VoterID,Name,Ward,Phone"></textarea>
+    <button onclick="importVoters()">Import</button>
+    <h3>Voter List</h3>
+    <table id="voterTable"></table>
+  </div>
+
+  <div id="aResults" class="tab hidden">
+    <h3>Election Results</h3>
+    <select id="rElection" style="width:300px"></select>
+    <button onclick="showResults()">Get Results</button>
+    <div id="resultBox"></div>
+  </div>
+</div>
+
+
+</main>
+
+<footer>© 2026 VoteOnline | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "Election Officer", username: "admin", password: "admin123", role: "admin" },
+    { name: "Arun Kumar", username: "V1001", password: "1234", role: "voter", ward: "Ward 1", phone: "9876500001" },
+    { name: "Divya Lakshmi", username: "V1002", password: "1234", role: "voter", ward: "Ward 2", phone: "9876500002" },
+    { name: "Karthik Raja", username: "V1003", password: "1234", role: "voter", ward: "Ward 1", phone: "9876500003" }
+  ];
+  var currentUser = null;
+  var BOXES = ["otpBox", "userBox", "adminBox"];
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function badge(text) {
+    var color = "orange";
+    if (/^(Approved|Active|Resolved|Completed|Confirmed|Available|Delivered|Paid|Open|Shortlisted|Selected|Done|Collected|Voted)$/.test(text)) color = "green";
+    if (/^(Rejected|Cancelled|Closed|Pending Payment Due|Full|Overdue|Unpaid|Declined|Removed)$/.test(text)) color = "red";
+    return "<span class='badge " + color + "'>" + text + "</span>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function mapHtml(query) {
+    var q = encodeURIComponent(query);
+    return "<iframe class='map' src='https://maps.google.com/maps?q=" + q + "&output=embed'></iframe>" +
+      "<p><a href='https://www.google.com/maps/search/?api=1&query=" + q + "' target='_blank'>Open in Google Maps</a></p>";
+  }
+
+  // ---------- Login / Register ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        if (typeof canLogin == "function") {
+          var block = canLogin(users[i]);
+          if (block != "") {
+            el("loginMsg").innerText = block;
+            return;
+          }
+        }
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        startSession(r);
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function register() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("regMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    var account = { name: name, username: user, password: pass, role: "voter" };
+
+    if (typeof checkRegistration == "function") {
+      var problem = checkRegistration(account);
+      if (problem != "") {
+        el("regMsg").innerText = problem;
+        return;
+      }
+    }
+    users.push(account);
+    if (typeof afterRegister == "function") afterRegister(account);
+    alert("Registration successful. Please login.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    for (var i = 0; i < BOXES.length; i++) hide(BOXES[i]);
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+
+  // ---------- Data ----------
+  var wards = ["Ward 1", "Ward 2", "Ward 3"];
+  var elections = [{ id: 1, name: "City Council Election 2026", date: "2026-11-20", status: "Open" }];
+  var candidates = [
+    { id: 1, name: "Meena Sundar", party: "People's Front", symbol: "🌻", electionId: 1, ward: "Ward 1" },
+    { id: 2, name: "Ravi Shankar", party: "Citizens Alliance", symbol: "🚲", electionId: 1, ward: "Ward 1" },
+    { id: 3, name: "Anitha Devi", party: "People's Front", symbol: "🌻", electionId: 1, ward: "Ward 2" },
+    { id: 4, name: "Suresh Babu", party: "Green Party", symbol: "🌳", electionId: 1, ward: "Ward 2" }
+  ];
+  var votes = [];
+  var nextElectionId = 2;
+  var nextCandidateId = 5;
+  var nextReceipt = 9001;
+  var loginOtp = "";
+  var voteOtp = "";
+  var votingElection = 0;
+  var pickedCandidate = 0;
+  var editVoter = "";
+
+  function newOtp() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  function startSession(role) {
+    if (role == "admin") {
+      show("adminBox");
+      openTab("adminBox", "aElections");
+    } else {
+      sendLoginOtp();
+      show("otpBox");
+    }
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      fillAdminLists();
+      showAdminElections();
+      showCandidates();
+      showWards();
+      showVoters();
+    } else {
+      showUserStats();
+      showElections();
+      showReceipts();
+    }
+  }
+
+  // ---------- OTP login ----------
+  function sendLoginOtp() {
+    loginOtp = newOtp();
+    el("otpInfo").innerText = "An OTP has been sent to the mobile number ending " + currentUser.phone.slice(-4);
+    alert("SMS: Your VoteOnline login OTP is " + loginOtp);
+  }
+
+  function verifyLoginOtp() {
+    if (el("otpInput").value != loginOtp) {
+      el("otpMsg").innerText = "Wrong OTP. Please try again.";
+      return;
+    }
+    el("otpMsg").innerText = "";
+    el("otpInput").value = "";
+    hide("otpBox");
+    show("userBox");
+    openTab("userBox", "uElections");
+  }
+
+  // ---------- Voter ----------
+  function hasVoted(electionId) {
+    for (var i = 0; i < votes.length; i++) {
+      if (votes[i].electionId == electionId && votes[i].voterId == currentUser.username) return votes[i];
+    }
+  }
+
+  function showUserStats() {
+    var open = 0, done = 0;
+    for (var i = 0; i < elections.length; i++) {
+      if (elections[i].status == "Open") open++;
+      if (hasVoted(elections[i].id)) done++;
+    }
+    el("userStats").innerHTML = statBox("s1", currentUser.ward || "Not allocated", "My Ward") + statBox("s2", open, "Open Elections") + statBox("s3", done, "Votes Cast");
+  }
+
+  function showElections() {
+    var html = "<tr><th>Election</th><th>Date</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < elections.length; i++) {
+      var e = elections[i];
+      html += "<tr><td>" + e.name + "</td><td>" + e.date + "</td><td>" + badge(e.status) + "</td><td>";
+      if (hasVoted(e.id)) html += badge("Voted");
+      else if (e.status == "Open" && currentUser.ward) html += "<button onclick='openVote(" + e.id + ")'>Vote Now</button>";
+      else if (!currentUser.ward) html += "<small>You are not allocated to a ward</small>";
+      html += "</td></tr>";
+    }
+    el("electionTable").innerHTML = html;
+  }
+
+  function openVote(id) {
+    votingElection = id;
+    pickedCandidate = 0;
+    voteOtp = "";
+    el("voteMsg").innerText = "";
+    el("voteOtp").value = "";
+    openTab("userBox", "uVote");
+    drawCandidates();
+  }
+
+  function drawCandidates() {
+    var e = findById(elections, votingElection);
+    if (!e) return;
+    el("voteTitle").innerText = e.name + " - candidates for " + currentUser.ward;
+    var html = "<div class='grid'>";
+    var count = 0;
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i];
+      if (c.electionId == e.id && c.ward == currentUser.ward) {
+        count++;
+        html += "<div class='card' style='" + (pickedCandidate == c.id ? "border:3px solid #27ae60" : "") + "'><div class='pic'>" + c.symbol + "</div><h4>" + c.name + "</h4><small>" + c.party +
+          "</small><br><button onclick='pickCandidate(" + c.id + ")'>" + (pickedCandidate == c.id ? "Selected ✓" : "Select") + "</button></div>";
+      }
+    }
+    html += "</div>";
+    if (count == 0) html = "<p>No candidates for your ward in this election.</p>";
+    el("candidateList").innerHTML = html;
+    if (count > 0) show("voteOtpBox"); else hide("voteOtpBox");
+  }
+
+  function pickCandidate(id) {
+    pickedCandidate = id;
+    drawCandidates();
+  }
+
+  function getVoteOtp() {
+    if (pickedCandidate == 0) {
+      el("voteMsg").innerText = "Please select a candidate first";
+      return;
+    }
+    voteOtp = newOtp();
+    el("voteMsg").innerText = "";
+    alert("SMS: Your OTP for voting is " + voteOtp);
+  }
+
+  function submitVote() {
+    var e = findById(elections, votingElection);
+    if (pickedCandidate == 0) {
+      el("voteMsg").innerText = "Please select a candidate first";
+      return;
+    }
+    if (voteOtp == "" || el("voteOtp").value != voteOtp) {
+      el("voteMsg").innerText = "Get the OTP and enter it correctly to submit your vote";
+      return;
+    }
+    if (e.status != "Open") {
+      el("voteMsg").innerText = "This election is closed";
+      return;
+    }
+    if (hasVoted(e.id)) {
+      el("voteMsg").innerText = "You have already voted in this election";
+      return;
+    }
+    var receipt = "R" + nextReceipt++;
+    votes.push({ electionId: e.id, voterId: currentUser.username, candidateId: pickedCandidate, ward: currentUser.ward, receipt: receipt, time: new Date().toLocaleString() });
+    voteOtp = "";
+    alert("Your vote has been recorded. Receipt number: " + receipt);
+    openTab("userBox", "uReceipts");
+  }
+
+  function showReceipts() {
+    var html = "<tr><th>Receipt</th><th>Election</th><th>Time</th></tr>";
+    for (var i = 0; i < votes.length; i++) {
+      if (votes[i].voterId == currentUser.username) {
+        html += "<tr><td>" + votes[i].receipt + "</td><td>" + findById(elections, votes[i].electionId).name + "</td><td>" + votes[i].time + "</td></tr>";
+      }
+    }
+    el("receiptTable").innerHTML = html;
+  }
+
+  // ---------- Admin: elections and candidates ----------
+  function showAdminStats() {
+    var voters = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "voter") voters++;
+    }
+    el("adminStats").innerHTML = statBox("s1", elections.length, "Elections") + statBox("s2", candidates.length, "Candidates") + statBox("s3", voters, "Voters") + statBox("s4", votes.length, "Votes Cast");
+  }
+
+  function fillAdminLists() {
+    var wardOptions = "";
+    for (var i = 0; i < wards.length; i++) wardOptions += "<option>" + wards[i] + "</option>";
+    var electionOptions = "";
+    for (var j = 0; j < elections.length; j++) electionOptions += "<option value='" + elections[j].id + "'>" + elections[j].name + "</option>";
+    var voterOptions = "";
+    for (var k = 0; k < users.length; k++) {
+      if (users[k].role == "voter") voterOptions += "<option value='" + users[k].username + "'>" + users[k].username + " - " + users[k].name + "</option>";
+    }
+    if (el("cWard").options.length != wards.length) { el("cWard").innerHTML = wardOptions; el("wWard").innerHTML = wardOptions; el("vWard").innerHTML = wardOptions; }
+    if (el("cElection").options.length != elections.length) { el("cElection").innerHTML = electionOptions; el("rElection").innerHTML = electionOptions; }
+    el("wVoter").innerHTML = voterOptions;
+  }
+
+  function addElection() {
+    if (el("eName").value == "" || el("eDate").value == "") {
+      alert("Enter the election name and date");
+      return;
+    }
+    elections.push({ id: nextElectionId++, name: el("eName").value, date: el("eDate").value, status: "Open" });
+    el("eName").value = "";
+    el("eDate").value = "";
+    refresh();
+  }
+
+  function showAdminElections() {
+    var html = "<tr><th>Election</th><th>Date</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < elections.length; i++) {
+      var e = elections[i];
+      html += "<tr><td>" + e.name + "</td><td>" + e.date + "</td><td>" + badge(e.status) + "</td><td><button onclick='toggleElection(" + e.id + ")'>" +
+        (e.status == "Open" ? "Close Voting" : "Re-open") + "</button><button onclick='deleteElection(" + e.id + ")'>Delete</button></td></tr>";
+    }
+    el("adminElectionTable").innerHTML = html;
+  }
+
+  function toggleElection(id) {
+    var e = findById(elections, id);
+    e.status = e.status == "Open" ? "Closed" : "Open";
+    refresh();
+  }
+
+  function deleteElection(id) {
+    for (var i = 0; i < votes.length; i++) {
+      if (votes[i].electionId == id) {
+        alert("Votes have already been cast in this election, so it cannot be deleted");
+        return;
+      }
+    }
+    if (!confirm("Delete this election and its candidates?")) return;
+    elections.splice(elections.indexOf(findById(elections, id)), 1);
+    for (var j = candidates.length - 1; j >= 0; j--) {
+      if (candidates[j].electionId == id) candidates.splice(j, 1);
+    }
+    el("cElection").innerHTML = "";
+    refresh();
+  }
+
+  function addCandidate() {
+    if (el("cName").value == "" || el("cParty").value == "" || el("cElection").value == "") {
+      el("candMsg").innerText = "Please enter the candidate name, party and election";
+      return;
+    }
+    candidates.push({
+      id: nextCandidateId++, name: el("cName").value, party: el("cParty").value, symbol: el("cSymbol").value || "⭐",
+      electionId: parseInt(el("cElection").value), ward: el("cWard").value
+    });
+    el("candMsg").innerText = "";
+    el("cName").value = "";
+    el("cParty").value = "";
+    el("cSymbol").value = "";
+    refresh();
+  }
+
+  function showCandidates() {
+    var html = "<tr><th>Symbol</th><th>Candidate</th><th>Party</th><th>Election</th><th>Ward</th><th>Action</th></tr>";
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i];
+      html += "<tr><td style='font-size:26px'>" + c.symbol + "</td><td>" + c.name + "</td><td>" + c.party + "</td><td>" + findById(elections, c.electionId).name + "</td><td>" + c.ward +
+        "</td><td><button onclick='deleteCandidate(" + c.id + ")'>Delete</button></td></tr>";
+    }
+    el("candidateTable").innerHTML = html;
+  }
+
+  function deleteCandidate(id) {
+    for (var i = 0; i < votes.length; i++) {
+      if (votes[i].candidateId == id) {
+        alert("Votes have already been cast for this candidate");
+        return;
+      }
+    }
+    candidates.splice(candidates.indexOf(findById(candidates, id)), 1);
+    refresh();
+  }
+
+  // ---------- Admin: wards and voters ----------
+  function addWard() {
+    var name = el("newWard").value;
+    if (name == "" || wards.indexOf(name) != -1) {
+      alert("Enter a new ward name");
+      return;
+    }
+    wards.push(name);
+    el("newWard").value = "";
+    el("cWard").innerHTML = "";
+    refresh();
+  }
+
+  function allocateVoter() {
+    var voter = findUser(el("wVoter").value);
+    if (!voter) return;
+    voter.ward = el("wWard").value;
+    refresh();
+  }
+
+  function showWards() {
+    var html = "<tr><th>Ward</th><th>Voters</th><th>Candidates</th></tr>";
+    for (var i = 0; i < wards.length; i++) {
+      var v = 0, c = 0;
+      for (var j = 0; j < users.length; j++) {
+        if (users[j].role == "voter" && users[j].ward == wards[i]) v++;
+      }
+      for (var k = 0; k < candidates.length; k++) {
+        if (candidates[k].ward == wards[i]) c++;
+      }
+      html += "<tr><td>" + wards[i] + "</td><td>" + v + "</td><td>" + c + "</td></tr>";
+    }
+    el("wardTable").innerHTML = html;
+  }
+
+  function saveVoter() {
+    var id = el("vId").value.toUpperCase();
+    var name = el("vName").value;
+    if (id == "" || name == "" || el("vPass").value == "") {
+      el("voterMsg").innerText = "Please fill voter ID, name and password";
+      return;
+    }
+    if (editVoter == "") {
+      if (findUser(id)) {
+        el("voterMsg").innerText = "This voter ID already exists";
+        return;
+      }
+      users.push({ name: name, username: id, password: el("vPass").value, role: "voter", ward: el("vWard").value, phone: el("vPhone").value });
+    } else {
+      var v = findUser(editVoter);
+      v.name = name;
+      v.password = el("vPass").value;
+      v.ward = el("vWard").value;
+      v.phone = el("vPhone").value;
+    }
+    clearVoterForm();
+    refresh();
+  }
+
+  function clearVoterForm() {
+    el("vId").value = "";
+    el("vName").value = "";
+    el("vPhone").value = "";
+    el("vPass").value = "1234";
+    el("vId").disabled = false;
+    editVoter = "";
+    el("voterMsg").innerText = "";
+    el("voterFormTitle").innerText = "Create Voter";
+  }
+
+  function editVoterForm(id) {
+    var v = findUser(id);
+    editVoter = id;
+    el("vId").value = v.username;
+    el("vId").disabled = true;
+    el("vName").value = v.name;
+    el("vPhone").value = v.phone;
+    el("vWard").value = v.ward;
+    el("vPass").value = v.password;
+    el("voterFormTitle").innerText = "Update Voter " + id;
+  }
+
+  function importVoters() {
+    var lines = el("importText").value.split("\n");
+    var added = 0, skipped = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var p = lines[i].split(",");
+      if (p.length < 4 || p[0].trim() == "") { if (lines[i].trim() != "") skipped++; continue; }
+      var id = p[0].trim().toUpperCase();
+      if (findUser(id)) { skipped++; continue; }
+      var ward = p[2].trim();
+      if (wards.indexOf(ward) == -1) wards.push(ward);
+      users.push({ name: p[1].trim(), username: id, password: "1234", role: "voter", ward: ward, phone: p[3].trim() });
+      added++;
+    }
+    el("importText").value = "";
+    el("cWard").innerHTML = "";
+    alert(added + " voter(s) imported, " + skipped + " line(s) skipped. The default password is 1234.");
+    refresh();
+  }
+
+  function showVoters() {
+    var html = "<tr><th>Voter ID</th><th>Name</th><th>Ward</th><th>Phone</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      if (u.role == "voter") {
+        html += "<tr><td>" + u.username + "</td><td>" + u.name + "</td><td>" + (u.ward || "-") + "</td><td>" + u.phone +
+          "</td><td><button onclick='editVoterForm(\"" + u.username + "\")'>Update</button><button onclick='deleteVoter(\"" + u.username + "\")'>Delete</button></td></tr>";
+      }
+    }
+    el("voterTable").innerHTML = html;
+  }
+
+  function deleteVoter(id) {
+    if (!confirm("Delete voter " + id + "?")) return;
+    users.splice(users.indexOf(findUser(id)), 1);
+    refresh();
+  }
+
+  // ---------- Admin: results ----------
+  function showResults() {
+    var e = findById(elections, el("rElection").value);
+    if (!e) return;
+    var total = 0, voters = 0;
+    for (var v = 0; v < users.length; v++) {
+      if (users[v].role == "voter") voters++;
+    }
+    var html = "<h4>" + e.name + " (" + e.status + ")</h4>";
+    for (var w = 0; w < wards.length; w++) {
+      var list = [];
+      for (var i = 0; i < candidates.length; i++) {
+        if (candidates[i].electionId == e.id && candidates[i].ward == wards[w]) {
+          var count = 0;
+          for (var j = 0; j < votes.length; j++) {
+            if (votes[j].candidateId == candidates[i].id) count++;
+          }
+          list.push({ c: candidates[i], count: count });
+        }
+      }
+      if (list.length == 0) continue;
+      list.sort(function (a, b) { return b.count - a.count; });
+      var wardTotal = 0;
+      for (var k = 0; k < list.length; k++) wardTotal += list[k].count;
+      total += wardTotal;
+      html += "<h4>" + wards[w] + " - " + wardTotal + " vote(s)</h4><table><tr><th>Candidate</th><th>Party</th><th>Votes</th><th>Share</th></tr>";
+      for (var m = 0; m < list.length; m++) {
+        var share = wardTotal == 0 ? 0 : Math.round(list[m].count * 100 / wardTotal);
+        html += "<tr><td>" + list[m].c.symbol + " " + list[m].c.name + (m == 0 && list[m].count > 0 ? " 🏆" : "") + "</td><td>" + list[m].c.party + "</td><td>" + list[m].count +
+          "</td><td><div style='background:#e1e8f0;border-radius:6px'><div style='background:#2a5298;color:white;font-size:11px;border-radius:6px;width:" + Math.max(share, 4) + "%'>&nbsp;" + share + "%</div></div></td></tr>";
+      }
+      html += "</table>";
+    }
+    html += "<p class='hint'>Total votes: " + total + " | Registered voters: " + voters + " | Turnout: " + (voters == 0 ? 0 : Math.round(total * 100 / voters)) + "%</p>";
+    el("resultBox").innerHTML = html;
+  }
+
+</script>
+
+</body>
+</html>

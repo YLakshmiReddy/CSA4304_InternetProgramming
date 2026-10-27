@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Finder - Real Estate Portal</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏡 Home Finder</h1>
+  <p>Search, save and book houses and lands in your budget</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="buyer">Buyer</option>
+    <option value="admin">Admin</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="hide('loginBox'); show('registerBox')">Register</button>
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Buyer: buyer / 1234</div>
+</div>
+
+<!-- Register -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Buyer Registration</h2>
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="regPhone" placeholder="Phone number"><br>
+  <button onclick="register()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+<!-- Buyer dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>🔑 Buyer Dashboard</h2>
+  <div id="adBox" class="hint"></div>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uSearch')">🔎 Search Property</button>
+    <button onclick="openTab('userBox','uFav')">❤️ Favorites</button>
+    <button onclick="openTab('userBox','uViewings')">📅 My Viewings</button>
+    <button onclick="openTab('userBox','uAgents')">🧑‍💼 Agents &amp; Companies</button>
+    <button onclick="openTab('userBox','uTools')">🧮 Calculators</button>
+  </nav>
+
+  <div id="uSearch" class="tab">
+    <h3>Search Property</h3>
+    <select id="sSaved" style="width:240px"></select>
+    <button onclick="useSaved()">Use Saved Search</button>
+    <button onclick="deleteSaved()">Delete Saved</button><br>
+    <input type="text" id="sLocation" placeholder="Location (area or city)">
+    <select id="sType">
+      <option value="">Any type</option>
+      <option>House</option>
+      <option>Flat</option>
+      <option>Land</option>
+      <option>Commercial</option>
+    </select>
+    <select id="sListing" style="width:140px">
+      <option value="">Buy or Rent</option>
+      <option>Buy</option>
+      <option>Rent</option>
+    </select>
+    <input type="number" id="sMax" placeholder="Max price (Rs)" style="width:160px">
+    <input type="number" id="sBeds" placeholder="Min bedrooms" style="width:150px"><br>
+    Amenities:
+    <label><input type="checkbox" class="amen" value="Parking" style="width:auto"> Parking</label>
+    <label><input type="checkbox" class="amen" value="Garden" style="width:auto"> Garden</label>
+    <label><input type="checkbox" class="amen" value="Gym" style="width:auto"> Gym</label>
+    <label><input type="checkbox" class="amen" value="Pool" style="width:auto"> Pool</label>
+    <label><input type="checkbox" class="amen" value="Security" style="width:auto"> Security</label><br>
+    <button onclick="searchProperties()">Search</button>
+    <button onclick="saveCriteria()">Save These Criteria</button>
+    <button onclick="clearSearch()">Clear</button>
+    <div class="grid" id="propertyGrid"></div>
+    <div id="detailBox"></div>
+    <div id="mapBox"></div>
+  </div>
+
+  <div id="uFav" class="tab hidden">
+    <h3>My Favorite Listings</h3>
+    <table id="favTable"></table>
+  </div>
+
+  <div id="uViewings" class="tab hidden">
+    <h3>My Property Viewings</h3>
+    <table id="viewingTable"></table>
+  </div>
+
+  <div id="uAgents" class="tab hidden">
+    <h3>Search Agents and Companies</h3>
+    <input type="text" id="agentText" placeholder="Agent, company or area">
+    <button onclick="showAgents()">Search</button>
+    <table id="agentTable"></table>
+  </div>
+
+  <div id="uTools" class="tab hidden">
+    <h3>Mortgage Calculator</h3>
+    <input type="number" id="mPrice" placeholder="Property price (Rs)">
+    <input type="number" id="mDown" placeholder="Down payment (%)" value="20" style="width:160px">
+    <input type="number" id="mRate" placeholder="Interest (% per year)" value="8.5" style="width:170px">
+    <input type="number" id="mYears" placeholder="Years" value="20" style="width:100px">
+    <button onclick="calcEmi()">Calculate EMI</button>
+    <p id="emiResult" class="info"></p>
+    <h3>Property Valuation</h3>
+    <select id="vLocation" style="width:200px"></select>
+    <select id="vType" style="width:160px">
+      <option>Flat</option>
+      <option>House</option>
+      <option>Land</option>
+      <option>Commercial</option>
+    </select>
+    <input type="number" id="vArea" placeholder="Area (sq ft)" style="width:160px">
+    <button onclick="calcValue()">Estimate Value</button>
+    <p id="valueResult" class="info"></p>
+  </div>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Admin Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aProps')">🏠 Properties</button>
+    <button onclick="openTab('adminBox','aAgents')">🧑‍💼 Agents</button>
+    <button onclick="openTab('adminBox','aVisitors')">👥 Visitors</button>
+    <button onclick="openTab('adminBox','aViewings')">📅 Viewings</button>
+    <button onclick="openTab('adminBox','aMessages')">✉️ Messages</button>
+  </nav>
+
+  <div id="aProps" class="tab">
+    <h3 id="propFormTitle">Add Property</h3>
+    <input type="text" id="pTitle" placeholder="Title">
+    <select id="pType" style="width:140px"><option>House</option><option>Flat</option><option>Land</option><option>Commercial</option></select>
+    <select id="pListing" style="width:110px"><option>Buy</option><option>Rent</option></select>
+    <input type="text" id="pLocation" placeholder="Area">
+    <input type="text" id="pCity" placeholder="City" style="width:150px">
+    <input type="number" id="pPrice" placeholder="Price (Rs)" style="width:140px">
+    <input type="number" id="pArea" placeholder="Sq ft" style="width:100px">
+    <input type="number" id="pBeds" placeholder="Bedrooms" style="width:110px">
+    <input type="text" id="pAmen" placeholder="Amenities (Parking, Garden...)" style="width:280px">
+    <select id="pAgent"></select>
+    <input type="text" id="pDesc" placeholder="Description" style="width:400px"><br>
+    <button onclick="saveProperty()">Save Property</button>
+    <button onclick="clearPropertyForm()">Clear</button>
+    <p class="msg" id="propMsg"></p>
+    <table id="adminPropTable"></table>
+  </div>
+
+  <div id="aAgents" class="tab hidden">
+    <h3>Add Agent</h3>
+    <input type="text" id="agName" placeholder="Agent name">
+    <input type="text" id="agCompany" placeholder="Company">
+    <input type="text" id="agPhone" placeholder="Phone">
+    <input type="text" id="agEmail" placeholder="Email">
+    <input type="text" id="agArea" placeholder="Area of work">
+    <button onclick="addAgent()">Add Agent</button>
+    <table id="adminAgentTable"></table>
+  </div>
+
+  <div id="aVisitors" class="tab hidden">
+    <h3>Customers Who Visited the Website</h3>
+    <table id="visitorTable"></table>
+  </div>
+
+  <div id="aViewings" class="tab hidden">
+    <h3>Viewing Requests</h3>
+    <table id="adminViewingTable"></table>
+  </div>
+
+  <div id="aMessages" class="tab hidden">
+    <h3>Messages to Agents</h3>
+    <table id="messageTable"></table>
+  </div>
+</div>
+
+</main>
+
+<footer>© 2026 Home Finder | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "Site Admin", username: "admin", password: "admin123", role: "admin", phone: "" },
+    { name: "Test Buyer", username: "buyer", password: "1234", role: "buyer", phone: "9876543210" }
+  ];
+
+  var agents = [
+    { id: 1, name: "Ramesh Kumar", company: "Prime Estates", phone: "9840011111", email: "ramesh@primeestates.com", area: "Chennai" },
+    { id: 2, name: "Sangeetha R", company: "Urban Nest Realty", phone: "9840022222", email: "sangeetha@urbannest.com", area: "Chennai" },
+    { id: 3, name: "Arjun Patel", company: "Green Acres Land", phone: "9840033333", email: "arjun@greenacres.com", area: "Coimbatore" }
+  ];
+
+  var properties = [
+    { id: 1, title: "3 BHK Apartment in Adyar", type: "Flat", listing: "Buy", location: "Adyar", city: "Chennai", price: 9500000, area: 1450, beds: 3, amenities: ["Parking", "Gym", "Security"], agentId: 1, desc: "Spacious flat close to the beach with a modular kitchen.", img: "🏢" },
+    { id: 2, title: "2 BHK Flat in Velachery", type: "Flat", listing: "Rent", location: "Velachery", city: "Chennai", price: 22000, area: 1050, beds: 2, amenities: ["Parking", "Security"], agentId: 2, desc: "Well ventilated flat near the metro station.", img: "🏢" },
+    { id: 3, title: "Independent Villa in Anna Nagar", type: "House", listing: "Buy", location: "Anna Nagar", city: "Chennai", price: 24000000, area: 3200, beds: 4, amenities: ["Parking", "Garden", "Pool", "Security"], agentId: 1, desc: "Luxury villa with a private garden and swimming pool.", img: "🏡" },
+    { id: 4, title: "Residential Plot in Coimbatore", type: "Land", listing: "Buy", location: "Saravanampatti", city: "Coimbatore", price: 3600000, area: 2400, beds: 0, amenities: [], agentId: 3, desc: "DTCP approved plot in a growing locality.", img: "🌳" },
+    { id: 5, title: "Shop Space in T Nagar", type: "Commercial", listing: "Rent", location: "T Nagar", city: "Chennai", price: 85000, area: 800, beds: 0, amenities: ["Security"], agentId: 2, desc: "Ground floor shop on a busy road.", img: "🏬" },
+    { id: 6, title: "3 BHK House in RS Puram", type: "House", listing: "Rent", location: "RS Puram", city: "Coimbatore", price: 30000, area: 1800, beds: 3, amenities: ["Parking", "Garden"], agentId: 3, desc: "Independent house with a car porch and garden.", img: "🏡" }
+  ];
+
+  var ads = [
+    { text: "🏦 Home loans starting from 8.5% - compare banks", link: "https://www.bankbazaar.com" },
+    { text: "🛋️ Furnish your new home - up to 40% off", link: "https://www.urbanladder.com" },
+    { text: "🚚 Packers and movers - get a free quote", link: "https://www.agarwalpackers.com" }
+  ];
+
+  var RATES = { "Adyar": 12000, "Anna Nagar": 11000, "T Nagar": 14000, "Velachery": 9000, "Saravanampatti": 4500, "RS Puram": 7500 };
+  var TYPE_FACTOR = { "Flat": 1, "House": 1.15, "Land": 0.7, "Commercial": 1.4 };
+
+  var saved = {};        // saved search criteria for every buyer
+  var favorites = {};
+  var viewings = [];
+  var messages = [];
+  var visitors = [];
+  var nextPropId = 7;
+  var nextAgentId = 4;
+  var nextViewingId = 1;
+  var currentUser = null;
+  var editPropId = 0;
+  var adIndex = 0;
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function priceText(p) {
+    return money(p.price) + (p.listing == "Rent" ? " / month" : "");
+  }
+
+  function mapHtml(query) {
+    var q = encodeURIComponent(query);
+    return "<h3>📍 " + query + "</h3><iframe class='map' src='https://maps.google.com/maps?q=" + q + "&output=embed'></iframe>" +
+      "<p><a href='https://www.google.com/maps/search/?api=1&query=" + q + "' target='_blank'>Open in Google Maps</a></p>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      fillAgentSelect();
+      showAdminProperties();
+      showAdminAgents();
+      showVisitors();
+      showAdminViewings();
+      showMessages();
+    } else {
+      showUserStats();
+      fillSaved();
+      fillValuationList();
+      showFavorites();
+      showViewings();
+      showAds();
+    }
+  }
+
+  function showAds() {
+    var ad = ads[adIndex % ads.length];
+    el("adBox").innerHTML = "Advertisement: <a href='" + ad.link + "' target='_blank'>" + ad.text + "</a>";
+    adIndex++;
+  }
+
+  // ---------- Login / Register ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        if (r == "admin") {
+          show("adminBox");
+          openTab("adminBox", "aProps");
+        } else {
+          visitors.push({ user: currentUser.name, username: currentUser.username, time: new Date().toLocaleString() });
+          show("userBox");
+          openTab("userBox", "uSearch");
+          searchProperties();
+        }
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function register() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("regMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    users.push({ name: name, username: user, password: pass, role: "buyer", phone: el("regPhone").value });
+    alert("Registration successful. Please login.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    hide("adminBox");
+    hide("userBox");
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+  // ---------- Search ----------
+  function getCriteria() {
+    var amen = [];
+    var boxes = document.getElementsByClassName("amen");
+    for (var i = 0; i < boxes.length; i++) {
+      if (boxes[i].checked) amen.push(boxes[i].value);
+    }
+    return {
+      location: el("sLocation").value, type: el("sType").value, listing: el("sListing").value,
+      max: el("sMax").value, beds: el("sBeds").value, amenities: amen
+    };
+  }
+
+  function setCriteria(c) {
+    el("sLocation").value = c.location;
+    el("sType").value = c.type;
+    el("sListing").value = c.listing;
+    el("sMax").value = c.max;
+    el("sBeds").value = c.beds;
+    var boxes = document.getElementsByClassName("amen");
+    for (var i = 0; i < boxes.length; i++) boxes[i].checked = c.amenities.indexOf(boxes[i].value) != -1;
+  }
+
+  function searchProperties() {
+    var c = getCriteria();
+    var loc = c.location.toLowerCase();
+    var html = "";
+    var count = 0;
+    for (var i = 0; i < properties.length; i++) {
+      var p = properties[i];
+      var ok = p.location.toLowerCase().indexOf(loc) != -1 || p.city.toLowerCase().indexOf(loc) != -1;
+      if (c.type != "" && p.type != c.type) ok = false;
+      if (c.listing != "" && p.listing != c.listing) ok = false;
+      if (c.max != "" && p.price > parseInt(c.max)) ok = false;
+      if (c.beds != "" && p.beds < parseInt(c.beds)) ok = false;
+      for (var a = 0; a < c.amenities.length; a++) {
+        if (p.amenities.indexOf(c.amenities[a]) == -1) ok = false;
+      }
+      if (ok) {
+        count++;
+        html += "<div class='card'><div class='pic'>" + p.img + "</div><h4>" + p.title + "</h4><small>" + p.location + ", " + p.city + "</small><br>" +
+          "<span class='price'>" + priceText(p) + "</span><br><small>" + p.type + " | " + p.area + " sq ft" + (p.beds > 0 ? " | " + p.beds + " BHK" : "") + "</small><br>" +
+          "<button onclick='showDetail(" + p.id + ")'>Details</button><button onclick='showPropertyMap(" + p.id + ")'>📍 Map</button>" +
+          "<button onclick='addFavorite(" + p.id + ")'>❤️</button></div>";
+      }
+    }
+    if (count == 0) html = "<p>No properties match your search</p>";
+    el("propertyGrid").innerHTML = html;
+    // show the searched area on the map
+    el("mapBox").innerHTML = c.location != "" ? mapHtml(c.location) : "";
+  }
+
+  function clearSearch() {
+    setCriteria({ location: "", type: "", listing: "", max: "", beds: "", amenities: [] });
+    searchProperties();
+  }
+
+  function showPropertyMap(id) {
+    var p = findById(properties, id);
+    el("mapBox").innerHTML = mapHtml(p.title + ", " + p.location + ", " + p.city);
+    el("mapBox").scrollIntoView();
+  }
+
+  function showDetail(id) {
+    var p = findById(properties, id);
+    var a = findById(agents, p.agentId);
+    el("detailBox").innerHTML = "<div class='info'><h3>" + p.img + " " + p.title + "</h3><p>" + p.desc + "</p>" +
+      "<p><b>" + priceText(p) + "</b> | " + p.type + " for " + p.listing + " | " + p.area + " sq ft | " + p.beds + " bedrooms</p>" +
+      "<p>Amenities: " + (p.amenities.length > 0 ? p.amenities.join(", ") : "None") + "</p>" +
+      "<p>Agent: <b>" + a.name + "</b> (" + a.company + ") - " + a.phone + "</p>" +
+      "Viewing date: <input type='date' id='vDate' style='width:160px' min='" + today() + "'> " +
+      "<select id='vTime' style='width:120px'><option>10:00</option><option>12:00</option><option>15:00</option><option>17:00</option></select> " +
+      "<button onclick='scheduleViewing(" + p.id + ")'>Schedule Viewing</button> <button onclick='contactAgent(" + a.id + ", " + p.id + ")'>Contact Agent</button></div>";
+    el("detailBox").scrollIntoView();
+  }
+
+  // ---------- Saved search criteria ----------
+  function saveCriteria() {
+    var name = prompt("Give a name to this search", "My search");
+    if (!name) return;
+    if (!saved[currentUser.username]) saved[currentUser.username] = [];
+    var c = getCriteria();
+    c.name = name;
+    saved[currentUser.username].push(c);
+    alert("Search criteria saved");
+    refresh();
+  }
+
+  function fillSaved() {
+    var list = saved[currentUser.username] || [];
+    if (el("sSaved").options.length == list.length + 1) return;
+    var html = "<option value=''>Saved searches (" + list.length + ")</option>";
+    for (var i = 0; i < list.length; i++) html += "<option value='" + i + "'>" + list[i].name + "</option>";
+    el("sSaved").innerHTML = html;
+  }
+
+  function useSaved() {
+    var i = el("sSaved").value;
+    if (i == "") {
+      alert("Choose a saved search first");
+      return;
+    }
+    setCriteria(saved[currentUser.username][i]);
+    searchProperties();
+  }
+
+  function deleteSaved() {
+    var i = el("sSaved").value;
+    if (i == "") return;
+    saved[currentUser.username].splice(i, 1);
+    refresh();
+  }
+
+  // ---------- Favorites, viewings, agents ----------
+  function addFavorite(id) {
+    if (!favorites[currentUser.username]) favorites[currentUser.username] = [];
+    var list = favorites[currentUser.username];
+    if (list.indexOf(id) != -1) {
+      alert("Already in your favorites");
+      return;
+    }
+    list.push(id);
+    alert("Listing saved to favorites");
+    refresh();
+  }
+
+  function showFavorites() {
+    var list = favorites[currentUser.username] || [];
+    var html = "<tr><th>Property</th><th>Location</th><th>Price</th><th>Action</th></tr>";
+    for (var i = 0; i < list.length; i++) {
+      var p = findById(properties, list[i]);
+      if (p) {
+        html += "<tr><td>" + p.title + "</td><td>" + p.location + ", " + p.city + "</td><td>" + priceText(p) +
+          "</td><td><button onclick='openFromFavorite(" + p.id + ")'>View</button><button onclick='removeFavorite(" + i + ")'>Remove</button></td></tr>";
+      }
+    }
+    el("favTable").innerHTML = html;
+  }
+
+  function openFromFavorite(id) {
+    openTab("userBox", "uSearch");
+    showDetail(id);
+  }
+
+  function removeFavorite(i) {
+    favorites[currentUser.username].splice(i, 1);
+    refresh();
+  }
+
+  function scheduleViewing(id) {
+    var date = el("vDate").value;
+    if (date == "" || date < today()) {
+      alert("Choose a viewing date (today or later)");
+      return;
+    }
+    viewings.push({ id: nextViewingId++, user: currentUser.username, propertyId: id, date: date, time: el("vTime").value, status: "Requested" });
+    alert("Viewing requested for " + date + " at " + el("vTime").value + ". The agent will confirm it.");
+    refresh();
+  }
+
+  function showViewings() {
+    var html = "<tr><th>ID</th><th>Property</th><th>Date</th><th>Time</th><th>Status</th></tr>";
+    for (var i = 0; i < viewings.length; i++) {
+      var v = viewings[i];
+      if (v.user == currentUser.username) {
+        html += "<tr><td>#" + v.id + "</td><td>" + findById(properties, v.propertyId).title + "</td><td>" + v.date + "</td><td>" + v.time + "</td><td>" + viewingBadge(v.status) + "</td></tr>";
+      }
+    }
+    el("viewingTable").innerHTML = html;
+  }
+
+  function viewingBadge(s) {
+    var color = s == "Approved" ? "green" : (s == "Declined" ? "red" : "orange");
+    return "<span class='badge " + color + "'>" + s + "</span>";
+  }
+
+  function showAgents() {
+    var text = el("agentText").value.toLowerCase();
+    var html = "<tr><th>Agent</th><th>Company</th><th>Area</th><th>Phone</th><th>Email</th><th>Action</th></tr>";
+    for (var i = 0; i < agents.length; i++) {
+      var a = agents[i];
+      if ((a.name + a.company + a.area).toLowerCase().indexOf(text) != -1) {
+        html += "<tr><td>" + a.name + "</td><td>" + a.company + "</td><td>" + a.area + "</td><td>" + a.phone + "</td><td>" + a.email +
+          "</td><td><button onclick='contactAgent(" + a.id + ", 0)'>Contact</button></td></tr>";
+      }
+    }
+    el("agentTable").innerHTML = html;
+  }
+
+  function contactAgent(agentId, propertyId) {
+    var text = prompt("Write your message to the agent");
+    if (!text) return;
+    messages.push({ user: currentUser.name, agentId: agentId, propertyId: propertyId, text: text, date: today() });
+    alert("Your message has been sent to the agent");
+  }
+
+  function showUserStats() {
+    var fav = (favorites[currentUser.username] || []).length;
+    var views = 0;
+    for (var i = 0; i < viewings.length; i++) {
+      if (viewings[i].user == currentUser.username) views++;
+    }
+    el("userStats").innerHTML = statBox("s1", properties.length, "Listings") + statBox("s2", fav, "Favorites") + statBox("s3", views, "Viewings");
+  }
+
+  // ---------- Calculators ----------
+  function calcEmi() {
+    var price = parseFloat(el("mPrice").value);
+    var down = parseFloat(el("mDown").value);
+    var rate = parseFloat(el("mRate").value);
+    var years = parseFloat(el("mYears").value);
+    if (isNaN(price) || isNaN(down) || isNaN(rate) || isNaN(years) || price <= 0 || years <= 0) {
+      el("emiResult").innerText = "Please enter valid values";
+      return;
+    }
+    var loan = price * (100 - down) / 100;
+    var r = rate / 12 / 100;
+    var n = years * 12;
+    var emi = r == 0 ? loan / n : loan * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    el("emiResult").innerHTML = "Loan amount: <b>" + money(Math.round(loan)) + "</b><br>Monthly EMI: <b>" + money(Math.round(emi)) +
+      "</b><br>Total interest: <b>" + money(Math.round(emi * n - loan)) + "</b>";
+  }
+
+  function fillValuationList() {
+    if (el("vLocation").options.length > 0) return;
+    var html = "";
+    for (var place in RATES) html += "<option>" + place + "</option>";
+    el("vLocation").innerHTML = html;
+  }
+
+  function calcValue() {
+    var area = parseFloat(el("vArea").value);
+    if (isNaN(area) || area <= 0) {
+      el("valueResult").innerText = "Please enter the area in sq ft";
+      return;
+    }
+    var rate = RATES[el("vLocation").value];
+    var value = area * rate * TYPE_FACTOR[el("vType").value];
+    el("valueResult").innerHTML = "Estimated value: <b>" + money(Math.round(value)) + "</b><br><small>Based on an average rate of Rs " + rate + " per sq ft for " + el("vLocation").value + "</small>";
+  }
+
+  // ---------- Admin ----------
+  function showAdminStats() {
+    var buyers = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "buyer") buyers++;
+    }
+    el("adminStats").innerHTML = statBox("s1", properties.length, "Properties") + statBox("s2", agents.length, "Agents") +
+      statBox("s3", buyers, "Buyers") + statBox("s4", visitors.length, "Visits");
+  }
+
+  function fillAgentSelect() {
+    if (el("pAgent").options.length == agents.length) return;
+    var html = "";
+    for (var i = 0; i < agents.length; i++) html += "<option value='" + agents[i].id + "'>" + agents[i].name + " (" + agents[i].company + ")</option>";
+    el("pAgent").innerHTML = html;
+  }
+
+  function saveProperty() {
+    var price = parseInt(el("pPrice").value);
+    var area = parseInt(el("pArea").value);
+    var beds = parseInt(el("pBeds").value);
+    if (el("pTitle").value == "" || el("pLocation").value == "" || el("pCity").value == "" || isNaN(price) || isNaN(area)) {
+      el("propMsg").innerText = "Please fill title, area, city, price and sq ft";
+      return;
+    }
+    var amen = [];
+    var parts = el("pAmen").value.split(",");
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i].trim() != "") amen.push(parts[i].trim());
+    }
+    var type = el("pType").value;
+    var data = {
+      title: el("pTitle").value, type: type, listing: el("pListing").value, location: el("pLocation").value, city: el("pCity").value,
+      price: price, area: area, beds: isNaN(beds) ? 0 : beds, amenities: amen, agentId: parseInt(el("pAgent").value), desc: el("pDesc").value,
+      img: type == "Land" ? "🌳" : (type == "Flat" ? "🏢" : (type == "Commercial" ? "🏬" : "🏡"))
+    };
+    if (editPropId == 0) {
+      data.id = nextPropId++;
+      properties.push(data);
+    } else {
+      data.id = editPropId;
+      properties[properties.indexOf(findById(properties, editPropId))] = data;
+    }
+    clearPropertyForm();
+    refresh();
+  }
+
+  function clearPropertyForm() {
+    var ids = ["pTitle", "pLocation", "pCity", "pPrice", "pArea", "pBeds", "pAmen", "pDesc"];
+    for (var i = 0; i < ids.length; i++) el(ids[i]).value = "";
+    editPropId = 0;
+    el("propMsg").innerText = "";
+    el("propFormTitle").innerText = "Add Property";
+  }
+
+  function editProperty(id) {
+    var p = findById(properties, id);
+    editPropId = id;
+    el("pTitle").value = p.title;
+    el("pType").value = p.type;
+    el("pListing").value = p.listing;
+    el("pLocation").value = p.location;
+    el("pCity").value = p.city;
+    el("pPrice").value = p.price;
+    el("pArea").value = p.area;
+    el("pBeds").value = p.beds;
+    el("pAmen").value = p.amenities.join(", ");
+    el("pAgent").value = p.agentId;
+    el("pDesc").value = p.desc;
+    el("propFormTitle").innerText = "Update Property: " + p.title;
+    window.scrollTo(0, 0);
+  }
+
+  function deleteProperty(id) {
+    if (!confirm("Delete this property?")) return;
+    properties.splice(properties.indexOf(findById(properties, id)), 1);
+    refresh();
+  }
+
+  function showAdminProperties() {
+    var html = "<tr><th>Property</th><th>Location</th><th>Type</th><th>Price</th><th>Agent</th><th>Action</th></tr>";
+    for (var i = 0; i < properties.length; i++) {
+      var p = properties[i];
+      var a = findById(agents, p.agentId);
+      html += "<tr><td>" + p.img + " " + p.title + "</td><td>" + p.location + ", " + p.city + "</td><td>" + p.type + " / " + p.listing + "</td><td>" + priceText(p) +
+        "</td><td>" + (a ? a.name : "-") + "</td><td><button onclick='editProperty(" + p.id + ")'>Update</button><button onclick='deleteProperty(" + p.id + ")'>Delete</button></td></tr>";
+    }
+    el("adminPropTable").innerHTML = html;
+  }
+
+  function addAgent() {
+    if (el("agName").value == "" || el("agCompany").value == "") {
+      alert("Enter the agent name and company");
+      return;
+    }
+    agents.push({ id: nextAgentId++, name: el("agName").value, company: el("agCompany").value, phone: el("agPhone").value, email: el("agEmail").value, area: el("agArea").value });
+    var ids = ["agName", "agCompany", "agPhone", "agEmail", "agArea"];
+    for (var i = 0; i < ids.length; i++) el(ids[i]).value = "";
+    refresh();
+  }
+
+  function showAdminAgents() {
+    var html = "<tr><th>Agent</th><th>Company</th><th>Area</th><th>Phone</th><th>Email</th><th>Action</th></tr>";
+    for (var i = 0; i < agents.length; i++) {
+      var a = agents[i];
+      html += "<tr><td>" + a.name + "</td><td>" + a.company + "</td><td>" + a.area + "</td><td>" + a.phone + "</td><td>" + a.email +
+        "</td><td><button onclick='deleteAgent(" + a.id + ")'>Delete</button></td></tr>";
+    }
+    el("adminAgentTable").innerHTML = html;
+  }
+
+  function deleteAgent(id) {
+    for (var i = 0; i < properties.length; i++) {
+      if (properties[i].agentId == id) {
+        alert("This agent has properties listed. Change those properties first.");
+        return;
+      }
+    }
+    agents.splice(agents.indexOf(findById(agents, id)), 1);
+    refresh();
+  }
+
+  function showVisitors() {
+    var html = "<tr><th>Customer</th><th>Username</th><th>Visited On</th></tr>";
+    for (var i = visitors.length - 1; i >= 0; i--) {
+      html += "<tr><td>" + visitors[i].user + "</td><td>" + visitors[i].username + "</td><td>" + visitors[i].time + "</td></tr>";
+    }
+    el("visitorTable").innerHTML = html;
+  }
+
+  function showAdminViewings() {
+    var html = "<tr><th>ID</th><th>Customer</th><th>Property</th><th>Date / Time</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < viewings.length; i++) {
+      var v = viewings[i];
+      html += "<tr><td>#" + v.id + "</td><td>" + findUser(v.user).name + "</td><td>" + findById(properties, v.propertyId).title + "</td><td>" + v.date + " " + v.time +
+        "</td><td>" + viewingBadge(v.status) + "</td><td>";
+      if (v.status == "Requested") html += "<button onclick='setViewing(" + v.id + ", \"Approved\")'>Approve</button><button onclick='setViewing(" + v.id + ", \"Declined\")'>Decline</button>";
+      html += "</td></tr>";
+    }
+    el("adminViewingTable").innerHTML = html;
+  }
+
+  function setViewing(id, status) {
+    findById(viewings, id).status = status;
+    refresh();
+  }
+
+  function showMessages() {
+    var html = "<tr><th>Date</th><th>From</th><th>Agent</th><th>Property</th><th>Message</th></tr>";
+    for (var i = 0; i < messages.length; i++) {
+      var m = messages[i];
+      var p = m.propertyId == 0 ? "-" : findById(properties, m.propertyId).title;
+      html += "<tr><td>" + m.date + "</td><td>" + m.user + "</td><td>" + findById(agents, m.agentId).name + "</td><td>" + p + "</td><td>" + m.text + "</td></tr>";
+    }
+    el("messageTable").innerHTML = html;
+  }
+</script>
+
+</body>
+</html>

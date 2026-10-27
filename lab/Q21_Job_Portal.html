@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Job Portal</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💼 JobConnect</h1>
+  <p>Find the right job or the right candidate</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="user">Job Seeker</option>
+    <option value="director">Director (Employer)</option>
+    <option value="admin">Admin</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="hide('loginBox'); show('registerBox')">Register</button>
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Director: director / 1234<br>Job seeker: seeker / 1234</div>
+</div>
+
+<!-- Register -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Register</h2>
+  <select id="regRole">
+    <option value="user">Register as Job Seeker</option>
+    <option value="director">Register as Director</option>
+  </select><br>
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="regPhone" placeholder="Phone number"><br>
+  <input type="text" id="regCompany" placeholder="Company (directors only)"><br>
+  <button onclick="register()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+
+<!-- Applicant dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>🧑‍💼 Job Seeker Dashboard</h2>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uSearch')">🔍 Search Vacancy</button>
+    <button onclick="openTab('userBox','uApps')">📄 My Applications</button>
+    <button onclick="openTab('userBox','uNotes')">🔔 Notifications</button>
+    <button onclick="openTab('userBox','uResume')">📝 My Resume</button>
+  </nav>
+
+  <div id="uSearch" class="tab">
+    <h3>Search Vacancies</h3>
+    <input type="text" id="sText" placeholder="Job title or company">
+    <select id="sLocation"></select>
+    <select id="sCategory"></select>
+    <button onclick="searchVacancies()">Search</button>
+    <button onclick="clearSearch()">Clear</button>
+    <div class="grid" id="vacancyGrid"></div>
+    <div id="detailBox"></div>
+  </div>
+
+  <div id="uApps" class="tab hidden">
+    <h3>My Applications</h3>
+    <table id="appTable"></table>
+  </div>
+
+  <div id="uNotes" class="tab hidden">
+    <h3>Daily Updates and Notifications</h3>
+    <table id="noteTable"></table>
+  </div>
+
+  <div id="uResume" class="tab hidden">
+    <h3>My Resume</h3>
+    <input type="text" id="rPhone" placeholder="Phone"><br>
+    <input type="text" id="rSkills" placeholder="Skills (Java, Sales, Accounting...)" style="width:400px"><br>
+    <input type="text" id="rExperience" placeholder="Experience (e.g. 2 years in banking)" style="width:400px"><br>
+    <textarea id="rSummary" rows="3" placeholder="Short summary about you"></textarea>
+    Upload resume file: <input type="file" id="rFile"><br>
+    <button onclick="saveResume()">Save Resume</button>
+  </div>
+</div>
+
+<!-- Director dashboard -->
+<div id="directorBox" class="box hidden">
+  <h2>🏢 Director Dashboard</h2>
+  <div class="stats" id="directorStats"></div>
+  <nav>
+    <button onclick="openTab('directorBox','dPost')">➕ Post Vacancy</button>
+    <button onclick="openTab('directorBox','dView')">📋 My Vacancies</button>
+    <button onclick="openTab('directorBox','dApplied')">👥 Applied Users</button>
+    <button onclick="openTab('directorBox','dResumes')">📂 Browse Resumes</button>
+  </nav>
+
+  <div id="dPost" class="tab">
+    <h3>Post a Vacancy</h3>
+    <input type="text" id="vTitle" placeholder="Job title">
+    <select id="vCategory"><option>IT</option><option>Banking</option><option>Sales</option><option>Education</option><option>Healthcare</option><option>Engineering</option></select>
+    <input type="text" id="vLocation" placeholder="Location">
+    <input type="text" id="vSalary" placeholder="Salary (Rs per month)" style="width:200px"><br>
+    <textarea id="vDesc" rows="3" placeholder="Job description and requirements"></textarea>
+    <input type="text" id="vContact" placeholder="Contact (email / phone)" style="width:300px">
+    Image: <input type="file" id="vPhoto" accept="image/*"><br>
+    <button onclick="postVacancy()">Post Vacancy</button>
+    <p class="msg" id="vacancyMsg"></p>
+  </div>
+
+  <div id="dView" class="tab hidden">
+    <h3>Vacancies Posted by Me</h3>
+    <table id="myVacancyTable"></table>
+  </div>
+
+  <div id="dApplied" class="tab hidden">
+    <h3>Users Who Applied</h3>
+    <table id="appliedTable"></table>
+  </div>
+
+  <div id="dResumes" class="tab hidden">
+    <h3>Browse Posted Resumes</h3>
+    <input type="text" id="resumeSearch" placeholder="Search skills or experience">
+    <button onclick="showResumes()">Search</button>
+    <table id="resumeTable"></table>
+  </div>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Admin Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aApprove')">✅ Approve Director</button>
+    <button onclick="openTab('adminBox','aUsers')">👥 View Users</button>
+    <button onclick="openTab('adminBox','aReport')">📊 Director Report</button>
+  </nav>
+
+  <div id="aApprove" class="tab">
+    <h3>Directors</h3>
+    <table id="directorTable"></table>
+  </div>
+
+  <div id="aUsers" class="tab hidden">
+    <h3>Registered Job Seekers</h3>
+    <table id="userTable"></table>
+  </div>
+
+  <div id="aReport" class="tab hidden">
+    <h3>Director Report</h3>
+    <table id="reportTable"></table>
+  </div>
+</div>
+
+
+</main>
+
+<footer>© 2026 JobConnect | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "Portal Admin", username: "admin", password: "admin123", role: "admin", phone: "", company: "", status: "Approved" },
+    { name: "Asha HR", username: "director", password: "1234", role: "director", phone: "9840012345", company: "TechNova Solutions", status: "Approved" },
+    { name: "Test Applicant", username: "seeker", password: "1234", role: "user", phone: "9876543210", company: "", status: "Approved", skills: "Java, SQL, HTML", experience: "Fresher", summary: "Computer science graduate looking for a developer role.", resumeFile: "" }
+  ];
+  var currentUser = null;
+  var BOXES = ["userBox", "directorBox", "adminBox"];
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function badge(text) {
+    var color = "orange";
+    if (/^(Approved|Active|Resolved|Completed|Confirmed|Available|Delivered|Paid|Open|Shortlisted|Selected|Done|Collected|Voted)$/.test(text)) color = "green";
+    if (/^(Rejected|Cancelled|Closed|Pending Payment Due|Full|Overdue|Unpaid|Declined|Removed)$/.test(text)) color = "red";
+    return "<span class='badge " + color + "'>" + text + "</span>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function mapHtml(query) {
+    var q = encodeURIComponent(query);
+    return "<iframe class='map' src='https://maps.google.com/maps?q=" + q + "&output=embed'></iframe>" +
+      "<p><a href='https://www.google.com/maps/search/?api=1&query=" + q + "' target='_blank'>Open in Google Maps</a></p>";
+  }
+
+  // ---------- Login / Register ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        if (typeof canLogin == "function") {
+          var block = canLogin(users[i]);
+          if (block != "") {
+            el("loginMsg").innerText = block;
+            return;
+          }
+        }
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        startSession(r);
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function register() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("regMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    var account = { name: name, username: user, password: pass, role: el("regRole").value };
+    account.phone = el("regPhone").value;
+    account.company = el("regCompany").value;
+    if (typeof checkRegistration == "function") {
+      var problem = checkRegistration(account);
+      if (problem != "") {
+        el("regMsg").innerText = problem;
+        return;
+      }
+    }
+    users.push(account);
+    if (typeof afterRegister == "function") afterRegister(account);
+    alert("Registration successful. Directors can login after admin approval.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    for (var i = 0; i < BOXES.length; i++) hide(BOXES[i]);
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+
+  // ---------- Data ----------
+  var vacancies = [
+    { id: 1, director: "director", title: "Junior Java Developer", category: "IT", location: "Chennai", salary: "25,000", desc: "Develop web applications using Java and SQL. Freshers can apply.", contact: "hr@technova.com", img: "💻", date: "2026-10-10" },
+    { id: 2, director: "director", title: "Sales Executive", category: "Sales", location: "Coimbatore", salary: "18,000", desc: "Field sales of software products with incentives.", contact: "9840012345", img: "📈", date: "2026-10-11" }
+  ];
+  var applications = [];
+  var notes = [];
+  var nextVacancyId = 3;
+  var nextApplicationId = 1;
+
+  function canLogin(u) {
+    if (u.role == "director" && u.status != "Approved") return u.status == "Rejected" ? "Your registration was rejected by the admin" : "Your account is waiting for admin approval";
+    return "";
+  }
+
+  function afterRegister(account) {
+    account.status = account.role == "director" ? "Pending" : "Approved";
+    if (account.role == "user") {
+      account.skills = "";
+      account.experience = "";
+      account.summary = "";
+      account.resumeFile = "";
+    }
+  }
+
+  function startSession(role) {
+    if (role == "admin") {
+      show("adminBox");
+      openTab("adminBox", "aApprove");
+    } else if (role == "director") {
+      show("directorBox");
+      openTab("directorBox", "dPost");
+    } else {
+      el("rPhone").value = currentUser.phone;
+      el("rSkills").value = currentUser.skills;
+      el("rExperience").value = currentUser.experience;
+      el("rSummary").value = currentUser.summary;
+      show("userBox");
+      openTab("userBox", "uSearch");
+    }
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      showDirectors();
+      showUsers();
+      showReport();
+    } else if (currentUser.role == "director") {
+      showDirectorStats();
+      showMyVacancies();
+      showApplied();
+      showResumes();
+    } else {
+      showUserStats();
+      fillFilters();
+      searchVacancies();
+      showApplications();
+      showNotes();
+    }
+  }
+
+  function notify(username, text) {
+    notes.push({ user: username, text: text, date: today() });
+  }
+
+  // ---------- Applicant ----------
+  function fillFilters() {
+    var places = [], cats = [];
+    for (var i = 0; i < vacancies.length; i++) {
+      if (places.indexOf(vacancies[i].location) == -1) places.push(vacancies[i].location);
+      if (cats.indexOf(vacancies[i].category) == -1) cats.push(vacancies[i].category);
+    }
+    if (el("sLocation").options.length != places.length + 1) {
+      var p = "<option value=''>All locations</option>";
+      for (var j = 0; j < places.length; j++) p += "<option>" + places[j] + "</option>";
+      el("sLocation").innerHTML = p;
+    }
+    if (el("sCategory").options.length != cats.length + 1) {
+      var c = "<option value=''>All categories</option>";
+      for (var k = 0; k < cats.length; k++) c += "<option>" + cats[k] + "</option>";
+      el("sCategory").innerHTML = c;
+    }
+  }
+
+  function hasApplied(vacancyId) {
+    for (var i = 0; i < applications.length; i++) {
+      if (applications[i].vacancyId == vacancyId && applications[i].user == currentUser.username) return true;
+    }
+    return false;
+  }
+
+  function picHtml(v) {
+    return v.img.indexOf("data:") == 0 ? "<img src='" + v.img + "'>" : "<div class='pic'>" + v.img + "</div>";
+  }
+
+  function searchVacancies() {
+    var text = el("sText").value.toLowerCase();
+    var place = el("sLocation").value;
+    var cat = el("sCategory").value;
+    var html = "";
+    var count = 0;
+    for (var i = vacancies.length - 1; i >= 0; i--) {
+      var v = vacancies[i];
+      var company = findUser(v.director) ? findUser(v.director).company : "";
+      var ok = (v.title + company).toLowerCase().indexOf(text) != -1;
+      if (place != "" && v.location != place) ok = false;
+      if (cat != "" && v.category != cat) ok = false;
+      if (ok) {
+        count++;
+        html += "<div class='card'>" + picHtml(v) + "<h4>" + v.title + "</h4><small>" + company + "<br>📍 " + v.location + " | " + v.category + "</small><br><span class='price'>Rs " + v.salary + "</span><br>" +
+          "<button onclick='showDetail(" + v.id + ")'>Details</button>" + (hasApplied(v.id) ? badge("Approved").replace("Approved", "Applied") : "<button onclick='applyVacancy(" + v.id + ")'>Apply</button>") + "</div>";
+      }
+    }
+    if (count == 0) html = "<p>No vacancies found</p>";
+    el("vacancyGrid").innerHTML = html;
+  }
+
+  function clearSearch() {
+    el("sText").value = "";
+    el("sLocation").value = "";
+    el("sCategory").value = "";
+    searchVacancies();
+  }
+
+  function showDetail(id) {
+    var v = findById(vacancies, id);
+    var d = findUser(v.director);
+    el("detailBox").innerHTML = "<div class='info'><h3>" + v.title + "</h3>" + picHtml(v) + "<p>" + v.desc + "</p><p>Company: <b>" + d.company + "</b><br>Location: " + v.location + " | Category: " + v.category +
+      "<br>Salary: Rs " + v.salary + " per month<br>Contact: " + v.contact + "<br>Posted on: " + v.date + "</p>" + (hasApplied(id) ? "<p>You have applied for this job.</p>" : "<button onclick='applyVacancy(" + id + ")'>Apply Now</button>") + "</div>";
+    el("detailBox").scrollIntoView();
+  }
+
+  function applyVacancy(id) {
+    if (currentUser.summary == "" && currentUser.skills == "") {
+      alert("Please complete your resume in the My Resume tab before applying");
+      openTab("userBox", "uResume");
+      return;
+    }
+    var message = prompt("Write a short note to the employer", "I am interested in this position.");
+    if (message === null) return;
+    applications.push({ id: nextApplicationId++, vacancyId: id, user: currentUser.username, note: message, date: today(), status: "Applied" });
+    var v = findById(vacancies, id);
+    notify(v.director, currentUser.name + " applied for " + v.title);
+    alert("Application sent to " + findUser(v.director).company);
+    refresh();
+  }
+
+  function showApplications() {
+    var html = "<tr><th>Job</th><th>Company</th><th>Applied On</th><th>Status</th></tr>";
+    for (var i = 0; i < applications.length; i++) {
+      var a = applications[i];
+      if (a.user == currentUser.username) {
+        var v = findById(vacancies, a.vacancyId);
+        html += "<tr><td>" + (v ? v.title : "Vacancy removed") + "</td><td>" + (v ? findUser(v.director).company : "-") + "</td><td>" + a.date + "</td><td>" + badge(a.status == "Applied" ? "Pending" : a.status) + "</td></tr>";
+      }
+    }
+    el("appTable").innerHTML = html;
+  }
+
+  function showNotes() {
+    var html = "<tr><th>Date</th><th>Notification</th></tr>";
+    for (var i = notes.length - 1; i >= 0; i--) {
+      if (notes[i].user == currentUser.username || notes[i].user == "ALL") html += "<tr><td>" + notes[i].date + "</td><td>🔔 " + notes[i].text + "</td></tr>";
+    }
+    el("noteTable").innerHTML = html;
+  }
+
+  function saveResume() {
+    currentUser.phone = el("rPhone").value;
+    currentUser.skills = el("rSkills").value;
+    currentUser.experience = el("rExperience").value;
+    currentUser.summary = el("rSummary").value;
+    if (el("rFile").files.length > 0) currentUser.resumeFile = el("rFile").files[0].name;
+    alert("Resume saved");
+    refresh();
+  }
+
+  function showUserStats() {
+    var mine = 0, selected = 0, news = 0;
+    for (var i = 0; i < applications.length; i++) {
+      if (applications[i].user == currentUser.username) {
+        mine++;
+        if (applications[i].status == "Shortlisted") selected++;
+      }
+    }
+    for (var j = 0; j < notes.length; j++) {
+      if (notes[j].user == currentUser.username || notes[j].user == "ALL") news++;
+    }
+    el("userStats").innerHTML = statBox("s1", vacancies.length, "Open Vacancies") + statBox("s2", mine, "Applied") + statBox("s3", selected, "Shortlisted") + statBox("s4", news, "Notifications");
+  }
+
+  // ---------- Director ----------
+  el("vPhoto").onchange = function () {
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () { photoData = reader.result; };
+    reader.readAsDataURL(file);
+  };
+  var photoData = "";
+
+  function postVacancy() {
+    if (el("vTitle").value == "" || el("vLocation").value == "" || el("vDesc").value == "" || el("vContact").value == "") {
+      el("vacancyMsg").innerText = "Please enter the title, location, description and contact";
+      return;
+    }
+    var v = {
+      id: nextVacancyId++, director: currentUser.username, title: el("vTitle").value, category: el("vCategory").value, location: el("vLocation").value,
+      salary: el("vSalary").value || "Not disclosed", desc: el("vDesc").value, contact: el("vContact").value, img: photoData != "" ? photoData : "💼", date: today()
+    };
+    vacancies.push(v);
+    notify("ALL", "New vacancy: " + v.title + " at " + currentUser.company + ", " + v.location);
+    var ids = ["vTitle", "vLocation", "vSalary", "vDesc", "vContact", "vPhoto"];
+    for (var i = 0; i < ids.length; i++) el(ids[i]).value = "";
+    photoData = "";
+    el("vacancyMsg").innerText = "";
+    alert("Vacancy posted. Job seekers will get a notification.");
+    openTab("directorBox", "dView");
+  }
+
+  function showMyVacancies() {
+    var html = "<tr><th>Job</th><th>Category</th><th>Location</th><th>Salary</th><th>Posted</th><th>Applicants</th><th>Action</th></tr>";
+    for (var i = 0; i < vacancies.length; i++) {
+      var v = vacancies[i];
+      if (v.director == currentUser.username) {
+        var count = 0;
+        for (var j = 0; j < applications.length; j++) {
+          if (applications[j].vacancyId == v.id) count++;
+        }
+        html += "<tr><td>" + v.title + "</td><td>" + v.category + "</td><td>" + v.location + "</td><td>Rs " + v.salary + "</td><td>" + v.date + "</td><td>" + count + "</td><td><button onclick='deleteVacancy(" + v.id + ")'>Delete</button></td></tr>";
+      }
+    }
+    el("myVacancyTable").innerHTML = html;
+  }
+
+  function deleteVacancy(id) {
+    if (!confirm("Delete this vacancy?")) return;
+    vacancies.splice(vacancies.indexOf(findById(vacancies, id)), 1);
+    el("sLocation").innerHTML = "";
+    el("sCategory").innerHTML = "";
+    refresh();
+  }
+
+  function showApplied() {
+    var html = "<tr><th>Job</th><th>Applicant</th><th>Skills / Experience</th><th>Note</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < applications.length; i++) {
+      var a = applications[i];
+      var v = findById(vacancies, a.vacancyId);
+      if (v && v.director == currentUser.username) {
+        var u = findUser(a.user);
+        html += "<tr><td>" + v.title + "</td><td>" + u.name + "<br><small>" + u.phone + "</small></td><td>" + u.skills + "<br><small>" + u.experience + "</small>" + (u.resumeFile != "" ? "<br>📎 " + u.resumeFile : "") +
+          "</td><td>" + a.note + "</td><td>" + badge(a.status == "Applied" ? "Pending" : a.status) + "</td><td>";
+        if (a.status == "Applied") html += "<button onclick='setApplication(" + a.id + ", \"Shortlisted\")'>Shortlist</button><button onclick='setApplication(" + a.id + ", \"Rejected\")'>Reject</button>";
+        html += "</td></tr>";
+      }
+    }
+    el("appliedTable").innerHTML = html;
+  }
+
+  function setApplication(id, status) {
+    var a = findById(applications, id);
+    a.status = status;
+    notify(a.user, "Your application for " + findById(vacancies, a.vacancyId).title + " was " + status.toLowerCase());
+    refresh();
+  }
+
+  function showResumes() {
+    var text = el("resumeSearch").value.toLowerCase();
+    var html = "<tr><th>Candidate</th><th>Skills</th><th>Experience</th><th>Summary</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      if (u.role == "user" && (u.skills + u.experience + u.summary).toLowerCase().indexOf(text) != -1 && (u.skills != "" || u.summary != "")) {
+        html += "<tr><td>" + u.name + "<br><small>" + u.phone + "</small></td><td>" + u.skills + "</td><td>" + u.experience + "</td><td>" + u.summary + "</td><td><button onclick='inviteCandidate(\"" + u.username + "\")'>Select / Invite</button></td></tr>";
+      }
+    }
+    el("resumeTable").innerHTML = html;
+  }
+
+  function inviteCandidate(username) {
+    notify(username, currentUser.company + " has selected your resume and invites you to apply. Contact: " + currentUser.phone);
+    alert("The candidate has been notified");
+  }
+
+  function showDirectorStats() {
+    var mine = 0, applied = 0;
+    for (var i = 0; i < vacancies.length; i++) {
+      if (vacancies[i].director == currentUser.username) mine++;
+    }
+    for (var j = 0; j < applications.length; j++) {
+      var v = findById(vacancies, applications[j].vacancyId);
+      if (v && v.director == currentUser.username) applied++;
+    }
+    el("directorStats").innerHTML = statBox("s1", mine, "My Vacancies") + statBox("s2", applied, "Applications");
+  }
+
+  // ---------- Admin ----------
+  function showAdminStats() {
+    var directors = 0, pending = 0, seekers = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "director") { directors++; if (users[i].status == "Pending") pending++; }
+      if (users[i].role == "user") seekers++;
+    }
+    el("adminStats").innerHTML = statBox("s1", directors, "Directors") + statBox("s4", pending, "Waiting Approval") + statBox("s2", seekers, "Job Seekers") + statBox("s3", vacancies.length, "Vacancies");
+  }
+
+  function showDirectors() {
+    var html = "<tr><th>Name</th><th>Company</th><th>Phone</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      if (u.role == "director") {
+        html += "<tr><td>" + u.name + "<br><small>" + u.username + "</small></td><td>" + u.company + "</td><td>" + u.phone + "</td><td>" + badge(u.status) + "</td><td>";
+        if (u.status == "Pending") html += "<button onclick='setDirector(\"" + u.username + "\", \"Approved\")'>Approve</button><button onclick='setDirector(\"" + u.username + "\", \"Rejected\")'>Reject</button>";
+        html += "</td></tr>";
+      }
+    }
+    el("directorTable").innerHTML = html;
+  }
+
+  function setDirector(username, status) {
+    findUser(username).status = status;
+    refresh();
+  }
+
+  function showUsers() {
+    var html = "<tr><th>Name</th><th>Username</th><th>Phone</th><th>Skills</th><th>Applications</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      if (u.role == "user") {
+        var count = 0;
+        for (var j = 0; j < applications.length; j++) {
+          if (applications[j].user == u.username) count++;
+        }
+        html += "<tr><td>" + u.name + "</td><td>" + u.username + "</td><td>" + u.phone + "</td><td>" + u.skills + "</td><td>" + count + "</td><td><button onclick='deleteUser(\"" + u.username + "\")'>Delete</button></td></tr>";
+      }
+    }
+    el("userTable").innerHTML = html;
+  }
+
+  function deleteUser(username) {
+    if (!confirm("Delete this user?")) return;
+    users.splice(users.indexOf(findUser(username)), 1);
+    for (var i = applications.length - 1; i >= 0; i--) {
+      if (applications[i].user == username) applications.splice(i, 1);
+    }
+    refresh();
+  }
+
+  function showReport() {
+    var html = "<tr><th>Director</th><th>Company</th><th>Vacancies Posted</th><th>Applications Received</th><th>Shortlisted</th><th>Status</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var d = users[i];
+      if (d.role == "director") {
+        var posted = 0, received = 0, selected = 0;
+        for (var j = 0; j < vacancies.length; j++) {
+          if (vacancies[j].director == d.username) posted++;
+        }
+        for (var k = 0; k < applications.length; k++) {
+          var v = findById(vacancies, applications[k].vacancyId);
+          if (v && v.director == d.username) {
+            received++;
+            if (applications[k].status == "Shortlisted") selected++;
+          }
+        }
+        html += "<tr><td>" + d.name + "</td><td>" + d.company + "</td><td>" + posted + "</td><td>" + received + "</td><td>" + selected + "</td><td>" + badge(d.status) + "</td></tr>";
+      }
+    }
+    el("reportTable").innerHTML = html;
+  }
+
+</script>
+
+</body>
+</html>

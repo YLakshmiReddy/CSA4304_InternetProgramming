@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComplainEase Complaint Management</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📢 ComplainEase</h1>
+  <p>Register, track and resolve public complaints</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="user">Citizen</option>
+    <option value="officer">Officer</option>
+    <option value="admin">Administrator</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="hide('loginBox'); show('registerBox')">Register</button>
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Citizen: citizen / 1234<br>Officer: OFF101 / 1234</div>
+</div>
+
+<!-- Register -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Register</h2>
+  <select id="regRole">
+    <option value="user">Register as Citizen</option>
+    <option value="officer">Register as Officer</option>
+  </select><br>
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="regPhone" placeholder="Phone number"><br>
+  <input type="text" id="regDept" placeholder="Department (officers only)"><br>
+  <button onclick="register()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+
+<!-- Citizen dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>🧑 Citizen Dashboard</h2>
+  <div id="infoStrip" class="hint"></div>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uPost')">📝 Post Complaint</button>
+    <button onclick="openTab('userBox','uStatus')">📋 My Complaints</button>
+    <button id="navFeedback" onclick="openTab('userBox','uFeedback')">💬 Feedback</button>
+    <button id="navContact" onclick="openTab('userBox','uContact')">📞 Admin Contact</button>
+  </nav>
+
+  <div id="uPost" class="tab">
+    <h3>Post a Complaint</h3>
+    <select id="cCategory">
+      <option>Roads</option><option>Water Supply</option><option>Electricity</option><option>Sanitation</option><option>Others</option>
+    </select>
+    <input type="text" id="cTitle" placeholder="Complaint title" style="width:360px"><br>
+    <textarea id="cDesc" rows="3" placeholder="Describe the problem in detail"></textarea>
+    <div id="locBox">
+      <input type="text" id="cLocation" placeholder="Location (street, area, city)" style="width:360px">
+      <button onclick="markLocation()">📍 Mark on Google Map</button>
+      <div id="mapBox"></div>
+    </div>
+    Supporting document / photo: <input type="file" id="cFile"><br>
+    <button onclick="postComplaint()">Submit Complaint</button>
+    <p class="msg" id="postMsg"></p>
+  </div>
+
+  <div id="uStatus" class="tab hidden">
+    <h3>My Complaints and Status</h3>
+    <table id="myComplaintTable"></table>
+  </div>
+
+  <div id="uFeedback" class="tab hidden">
+    <h3>Give Feedback on a Resolved Complaint</h3>
+    <select id="fbComplaint" style="width:380px"></select>
+    <select id="fbRating" style="width:140px">
+      <option value="5">5 - Excellent</option><option value="4">4 - Good</option><option value="3">3 - Average</option><option value="2">2 - Poor</option><option value="1">1 - Very Poor</option>
+    </select>
+    <textarea id="fbText" rows="3" placeholder="Your feedback"></textarea>
+    <button onclick="sendFeedback()">Submit Feedback</button>
+  </div>
+
+  <div id="uContact" class="tab hidden">
+    <h3>Administrator Contact Details</h3>
+    <div id="contactBox" class="info"></div>
+  </div>
+</div>
+
+<!-- Officer dashboard -->
+<div id="officerBox" class="box hidden">
+  <h2>👮 Officer Dashboard</h2>
+  <div class="stats" id="officerStats"></div>
+  <nav>
+    <button onclick="openTab('officerBox','oView')">📋 View Complaints</button>
+    <button onclick="openTab('officerBox','oUpdate')">✏️ Update Status</button>
+    <button id="navProof" onclick="openTab('officerBox','oProof')">🧾 Proof of Work</button>
+  </nav>
+
+  <div id="oView" class="tab">
+    <h3>All Complaints</h3>
+    <table id="allComplaintTable"></table>
+  </div>
+
+  <div id="oUpdate" class="tab hidden">
+    <h3>My Cases</h3>
+    <table id="caseTable"></table>
+  </div>
+
+  <div id="oProof" class="tab hidden">
+    <h3>Update Proof of Work</h3>
+    <table id="proofTable"></table>
+  </div>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Administrator Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aOfficers')">👮 Officer Login</button>
+    <button onclick="openTab('adminBox','aAccounts')">👥 Accounts</button>
+    <button onclick="openTab('adminBox','aComplaints')">📋 All Complaints</button>
+    <button onclick="openTab('adminBox','aFeatures')">⚙️ Features</button>
+    <button onclick="openTab('adminBox','aInfo')">📢 Information</button>
+  </nav>
+
+  <div id="aOfficers" class="tab">
+    <h3>Generate ID and Password for Officer</h3>
+    <input type="text" id="oName" placeholder="Officer name">
+    <input type="text" id="oDept" placeholder="Department">
+    <button onclick="generateOfficer()">Generate Login</button>
+    <p id="generated" class="info hidden"></p>
+    <table id="officerTable"></table>
+  </div>
+
+  <div id="aAccounts" class="tab hidden">
+    <h3>Create Account</h3>
+    <input type="text" id="nName" placeholder="Name">
+    <input type="text" id="nUser" placeholder="Username">
+    <input type="password" id="nPass" placeholder="Password">
+    <select id="nRole" style="width:140px"><option value="user">Citizen</option><option value="officer">Officer</option></select>
+    <button onclick="createAccount()">Create</button>
+    <p class="msg" id="accMsg"></p>
+    <table id="accountTable"></table>
+  </div>
+
+  <div id="aComplaints" class="tab hidden">
+    <h3>All Complaints</h3>
+    <table id="adminComplaintTable"></table>
+  </div>
+
+  <div id="aFeatures" class="tab hidden">
+    <h3>Show or Hide Features for Users and Officers</h3>
+    <p><label><input type="checkbox" id="fMap" style="width:auto" onchange="saveFeatures()"> Google map location marking</label></p>
+    <p><label><input type="checkbox" id="fFeedback" style="width:auto" onchange="saveFeatures()"> Feedback</label></p>
+    <p><label><input type="checkbox" id="fContact" style="width:auto" onchange="saveFeatures()"> Admin contact details</label></p>
+    <p><label><input type="checkbox" id="fProof" style="width:auto" onchange="saveFeatures()"> Officer proof of work</label></p>
+  </div>
+
+  <div id="aInfo" class="tab hidden">
+    <h3>Information Shown to Users</h3>
+    <input type="text" id="infoText" placeholder="Announcement" style="width:420px">
+    <button onclick="addInfo()">Post</button>
+    <table id="infoTable"></table>
+    <h3>Admin Contact Details</h3>
+    <input type="text" id="adPhone" placeholder="Phone">
+    <input type="text" id="adEmail" placeholder="Email">
+    <input type="text" id="adOffice" placeholder="Office address" style="width:360px">
+    <button onclick="saveContact()">Save Contact Details</button>
+  </div>
+</div>
+
+
+</main>
+
+<footer>© 2026 ComplainEase | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "Administrator", username: "admin", password: "admin123", role: "admin", phone: "", dept: "" },
+    { name: "Test Citizen", username: "citizen", password: "1234", role: "user", phone: "9876543210", dept: "" },
+    { name: "Officer Kumar", username: "OFF101", password: "1234", role: "officer", phone: "9840099999", dept: "Roads" }
+  ];
+  var currentUser = null;
+  var BOXES = ["userBox", "officerBox", "adminBox"];
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function badge(text) {
+    var color = "orange";
+    if (/^(Approved|Active|Resolved|Completed|Confirmed|Available|Delivered|Paid|Open|Shortlisted|Selected|Done|Collected|Voted)$/.test(text)) color = "green";
+    if (/^(Rejected|Cancelled|Closed|Pending Payment Due|Full|Overdue|Unpaid|Declined|Removed)$/.test(text)) color = "red";
+    return "<span class='badge " + color + "'>" + text + "</span>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function mapHtml(query) {
+    var q = encodeURIComponent(query);
+    return "<iframe class='map' src='https://maps.google.com/maps?q=" + q + "&output=embed'></iframe>" +
+      "<p><a href='https://www.google.com/maps/search/?api=1&query=" + q + "' target='_blank'>Open in Google Maps</a></p>";
+  }
+
+  // ---------- Login / Register ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        if (typeof canLogin == "function") {
+          var block = canLogin(users[i]);
+          if (block != "") {
+            el("loginMsg").innerText = block;
+            return;
+          }
+        }
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        startSession(r);
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function register() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("regMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    var account = { name: name, username: user, password: pass, role: el("regRole").value };
+    account.phone = el("regPhone").value;
+    account.dept = el("regDept").value;
+    if (typeof checkRegistration == "function") {
+      var problem = checkRegistration(account);
+      if (problem != "") {
+        el("regMsg").innerText = problem;
+        return;
+      }
+    }
+    users.push(account);
+    if (typeof afterRegister == "function") afterRegister(account);
+    alert("Registration successful. Please login.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    for (var i = 0; i < BOXES.length; i++) hide(BOXES[i]);
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+
+  // ---------- Data ----------
+  var complaints = [];
+  var feedbacks = [];
+  var infoList = ["Complaints are usually resolved within 7 working days."];
+  var features = { map: true, feedback: true, contact: true, proof: true };
+  var contact = { phone: "1800-123-4567", email: "help@complainease.gov", office: "Public Grievance Cell, Ripon Building, Chennai" };
+  var nextComplaintId = 1;
+  var nextOfficerNo = 102;
+  var STATUSES = ["Submitted", "In Progress", "Resolved", "Rejected"];
+
+  function startSession(role) {
+    var box = role == "admin" ? "adminBox" : (role == "officer" ? "officerBox" : "userBox");
+    show(box);
+    openTab(box, role == "admin" ? "aOfficers" : (role == "officer" ? "oView" : "uPost"));
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    applyFeatures();
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      showOfficers();
+      showAccounts();
+      showAdminComplaints();
+      showInfoTable();
+    } else if (currentUser.role == "officer") {
+      showOfficerStats();
+      showAllComplaints();
+      showCases();
+      showProofTable();
+    } else {
+      showUserStats();
+      showMyComplaints();
+      fillFeedbackList();
+      showContact();
+      el("infoStrip").innerHTML = "📢 " + infoList.join(" | ");
+    }
+  }
+
+  function applyFeatures() {
+    el("navFeedback").style.display = features.feedback ? "" : "none";
+    el("navContact").style.display = features.contact ? "" : "none";
+    el("navProof").style.display = features.proof ? "" : "none";
+    el("locBox").querySelector("button").style.display = features.map ? "" : "none";
+    el("fMap").checked = features.map;
+    el("fFeedback").checked = features.feedback;
+    el("fContact").checked = features.contact;
+    el("fProof").checked = features.proof;
+  }
+
+  function statusStep(status) {
+    var index = STATUSES.indexOf(status);
+    if (status == "Rejected") return badge("Rejected");
+    var parts = [];
+    for (var i = 0; i < 3; i++) parts.push((i <= index ? "✅ " : "⚪ ") + STATUSES[i]);
+    return parts.join("<br>");
+  }
+
+  // ---------- Citizen ----------
+  function markLocation() {
+    var place = el("cLocation").value;
+    if (place == "") {
+      alert("Type the location first");
+      return;
+    }
+    el("mapBox").innerHTML = mapHtml(place);
+  }
+
+  function postComplaint() {
+    var title = el("cTitle").value;
+    var desc = el("cDesc").value;
+    var location = el("cLocation").value;
+    if (title == "" || desc == "" || location == "") {
+      el("postMsg").innerText = "Please enter the title, description and location";
+      return;
+    }
+    var file = el("cFile").files.length > 0 ? el("cFile").files[0].name : "";
+    var id = nextComplaintId++;
+    complaints.push({
+      id: id, user: currentUser.username, category: el("cCategory").value, title: title, desc: desc, location: location, file: file,
+      status: "Submitted", officer: "", proof: "", proofFile: "", date: today(), feedback: null
+    });
+    el("postMsg").innerText = "";
+    el("cTitle").value = "";
+    el("cDesc").value = "";
+    el("cLocation").value = "";
+    el("cFile").value = "";
+    el("mapBox").innerHTML = "";
+    alert("Complaint registered. Your complaint number is C" + id + ". Updates will be sent by email and SMS.");
+    openTab("userBox", "uStatus");
+  }
+
+  function showMyComplaints() {
+    var html = "<tr><th>No</th><th>Category</th><th>Complaint</th><th>Location</th><th>Status</th><th>Officer</th><th>Proof of Work</th></tr>";
+    for (var i = 0; i < complaints.length; i++) {
+      var c = complaints[i];
+      if (c.user == currentUser.username) {
+        html += "<tr><td>C" + c.id + "<br><small>" + c.date + "</small></td><td>" + c.category + "</td><td><b>" + c.title + "</b><br><small>" + c.desc + "</small>" + (c.file != "" ? "<br>📎 " + c.file : "") +
+          "</td><td>" + c.location + "</td><td>" + statusStep(c.status) + "</td><td>" + (c.officer != "" ? findUser(c.officer).name : "Not assigned") +
+          "</td><td>" + (c.proof != "" ? c.proof + (c.proofFile != "" ? "<br>📷 " + c.proofFile : "") : "-") + "</td></tr>";
+      }
+    }
+    el("myComplaintTable").innerHTML = html;
+  }
+
+  function showUserStats() {
+    var total = 0, open = 0, done = 0;
+    for (var i = 0; i < complaints.length; i++) {
+      if (complaints[i].user == currentUser.username) {
+        total++;
+        if (complaints[i].status == "Resolved") done++; else if (complaints[i].status != "Rejected") open++;
+      }
+    }
+    el("userStats").innerHTML = statBox("s1", total, "My Complaints") + statBox("s3", open, "Open") + statBox("s2", done, "Resolved");
+  }
+
+  function fillFeedbackList() {
+    var html = "";
+    for (var i = 0; i < complaints.length; i++) {
+      var c = complaints[i];
+      if (c.user == currentUser.username && c.status == "Resolved" && c.feedback == null) html += "<option value='" + c.id + "'>C" + c.id + " - " + c.title + "</option>";
+    }
+    el("fbComplaint").innerHTML = html;
+  }
+
+  function sendFeedback() {
+    var id = el("fbComplaint").value;
+    if (id == "") {
+      alert("You have no resolved complaints without feedback");
+      return;
+    }
+    var c = findById(complaints, id);
+    c.feedback = { rating: el("fbRating").value, text: el("fbText").value };
+    feedbacks.push({ complaintId: c.id, user: currentUser.name, rating: el("fbRating").value, text: el("fbText").value });
+    el("fbText").value = "";
+    alert("Thank you for your feedback");
+    refresh();
+  }
+
+  function showContact() {
+    el("contactBox").innerHTML = "📞 " + contact.phone + "<br>✉️ " + contact.email + "<br>🏢 " + contact.office;
+  }
+
+  // ---------- Officer ----------
+  function showOfficerStats() {
+    var mine = 0, open = 0, done = 0;
+    for (var i = 0; i < complaints.length; i++) {
+      if (complaints[i].officer == currentUser.username) {
+        mine++;
+        if (complaints[i].status == "Resolved") done++; else open++;
+      }
+    }
+    el("officerStats").innerHTML = statBox("s1", mine, "My Cases") + statBox("s3", open, "Open") + statBox("s2", done, "Resolved");
+  }
+
+  function showAllComplaints() {
+    var html = "<tr><th>No</th><th>Citizen</th><th>Category</th><th>Complaint</th><th>Location</th><th>Status</th><th>Officer</th><th>Action</th></tr>";
+    for (var i = 0; i < complaints.length; i++) {
+      var c = complaints[i];
+      html += "<tr><td>C" + c.id + "</td><td>" + findUser(c.user).name + "</td><td>" + c.category + "</td><td><b>" + c.title + "</b><br><small>" + c.desc + "</small></td><td>" + c.location +
+        "</td><td>" + badge(c.status) + "</td><td>" + (c.officer != "" ? findUser(c.officer).name : "-") + "</td><td>";
+      if (c.officer == "") html += "<button onclick='takeCase(" + c.id + ")'>Take Case</button>";
+      html += "</td></tr>";
+    }
+    el("allComplaintTable").innerHTML = html;
+  }
+
+  function takeCase(id) {
+    var c = findById(complaints, id);
+    c.officer = currentUser.username;
+    c.status = "In Progress";
+    alert("Case C" + id + " assigned to you. The citizen has been informed.");
+    refresh();
+  }
+
+  function showCases() {
+    var html = "<tr><th>No</th><th>Complaint</th><th>Location</th><th>Status</th><th>Change To</th></tr>";
+    for (var i = 0; i < complaints.length; i++) {
+      var c = complaints[i];
+      if (c.officer == currentUser.username) {
+        var options = "";
+        for (var j = 0; j < STATUSES.length; j++) options += "<option" + (STATUSES[j] == c.status ? " selected" : "") + ">" + STATUSES[j] + "</option>";
+        html += "<tr><td>C" + c.id + "</td><td>" + c.title + "</td><td>" + c.location + "</td><td>" + badge(c.status) + "</td><td><select id='st" + c.id + "' style='width:140px'>" + options +
+          "</select><button onclick='updateStatus(" + c.id + ")'>Update</button></td></tr>";
+      }
+    }
+    el("caseTable").innerHTML = html;
+  }
+
+  function updateStatus(id) {
+    var c = findById(complaints, id);
+    c.status = el("st" + id).value;
+    alert("Status updated to " + c.status + ". An email and SMS were sent to " + findUser(c.user).name + ".");
+    refresh();
+  }
+
+  function showProofTable() {
+    var html = "<tr><th>No</th><th>Complaint</th><th>Proof of Work</th><th>Update</th></tr>";
+    for (var i = 0; i < complaints.length; i++) {
+      var c = complaints[i];
+      if (c.officer == currentUser.username) {
+        html += "<tr><td>C" + c.id + "</td><td>" + c.title + "</td><td>" + (c.proof != "" ? c.proof + "<br>📷 " + c.proofFile : "-") + "</td><td>" +
+          "<input type='text' id='pr" + c.id + "' placeholder='Work done' style='width:200px'><input type='file' id='pf" + c.id + "'><button onclick='saveProof(" + c.id + ")'>Save</button></td></tr>";
+      }
+    }
+    el("proofTable").innerHTML = html;
+  }
+
+  function saveProof(id) {
+    var c = findById(complaints, id);
+    var note = el("pr" + id).value;
+    if (note == "") {
+      alert("Describe the work done");
+      return;
+    }
+    c.proof = note;
+    c.proofFile = el("pf" + id).files.length > 0 ? el("pf" + id).files[0].name : "";
+    alert("Proof of work saved");
+    refresh();
+  }
+
+  // ---------- Admin ----------
+  function showAdminStats() {
+    var citizens = 0, officers = 0, open = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "user") citizens++;
+      if (users[i].role == "officer") officers++;
+    }
+    for (var j = 0; j < complaints.length; j++) {
+      if (complaints[j].status != "Resolved" && complaints[j].status != "Rejected") open++;
+    }
+    el("adminStats").innerHTML = statBox("s1", citizens, "Citizens") + statBox("s2", officers, "Officers") + statBox("s3", complaints.length, "Complaints") + statBox("s4", open, "Open");
+  }
+
+  function generateOfficer() {
+    var name = el("oName").value;
+    if (name == "") {
+      alert("Enter the officer name");
+      return;
+    }
+    var id = "OFF" + nextOfficerNo++;
+    var password = "pw" + Math.floor(1000 + Math.random() * 9000);
+    users.push({ name: name, username: id, password: password, role: "officer", phone: "", dept: el("oDept").value });
+    el("generated").classList.remove("hidden");
+    el("generated").innerHTML = "Officer login created.<br>ID: <b>" + id + "</b> &nbsp; Password: <b>" + password + "</b>";
+    el("oName").value = "";
+    el("oDept").value = "";
+    refresh();
+  }
+
+  function showOfficers() {
+    var html = "<tr><th>Name</th><th>Officer ID</th><th>Department</th><th>Cases</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      if (u.role == "officer") {
+        var cases = 0;
+        for (var j = 0; j < complaints.length; j++) {
+          if (complaints[j].officer == u.username) cases++;
+        }
+        html += "<tr><td>" + u.name + "</td><td>" + u.username + "</td><td>" + u.dept + "</td><td>" + cases + "</td><td><button onclick='changePassword(\"" + u.username + "\")'>Change Password</button></td></tr>";
+      }
+    }
+    el("officerTable").innerHTML = html;
+  }
+
+  function createAccount() {
+    var name = el("nName").value;
+    var user = el("nUser").value;
+    var pass = el("nPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("accMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("accMsg").innerText = "Username already exists";
+      return;
+    }
+    users.push({ name: name, username: user, password: pass, role: el("nRole").value, phone: "", dept: "" });
+    el("accMsg").innerText = "";
+    el("nName").value = "";
+    el("nUser").value = "";
+    el("nPass").value = "";
+    refresh();
+  }
+
+  function showAccounts() {
+    var html = "<tr><th>Name</th><th>Username</th><th>Role</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      html += "<tr><td>" + u.name + "</td><td>" + u.username + "</td><td>" + u.role + "</td><td><button onclick='changePassword(\"" + u.username + "\")'>Change Password</button>";
+      if (u.role != "admin") html += "<button onclick='deleteAccount(\"" + u.username + "\")'>Delete</button>";
+      html += "</td></tr>";
+    }
+    el("accountTable").innerHTML = html;
+  }
+
+  function changePassword(username) {
+    var pass = prompt("New password for " + username);
+    if (!pass) return;
+    findUser(username).password = pass;
+    alert("Password changed");
+  }
+
+  function deleteAccount(username) {
+    if (!confirm("Delete the account " + username + "?")) return;
+    users.splice(users.indexOf(findUser(username)), 1);
+    for (var i = 0; i < complaints.length; i++) {
+      if (complaints[i].officer == username) { complaints[i].officer = ""; complaints[i].status = "Submitted"; }
+    }
+    refresh();
+  }
+
+  function showAdminComplaints() {
+    var html = "<tr><th>No</th><th>Citizen</th><th>Complaint</th><th>Location</th><th>Status</th><th>Officer</th><th>Feedback</th></tr>";
+    for (var i = 0; i < complaints.length; i++) {
+      var c = complaints[i];
+      html += "<tr><td>C" + c.id + "</td><td>" + findUser(c.user).name + "</td><td><b>" + c.title + "</b><br><small>" + c.category + "</small></td><td>" + c.location + "</td><td>" + badge(c.status) +
+        "</td><td>" + (c.officer != "" ? findUser(c.officer).name : "-") + "</td><td>" + (c.feedback ? "⭐".repeat(c.feedback.rating) + "<br>" + c.feedback.text : "-") + "</td></tr>";
+    }
+    el("adminComplaintTable").innerHTML = html;
+  }
+
+  function saveFeatures() {
+    features.map = el("fMap").checked;
+    features.feedback = el("fFeedback").checked;
+    features.contact = el("fContact").checked;
+    features.proof = el("fProof").checked;
+    applyFeatures();
+  }
+
+  function addInfo() {
+    if (el("infoText").value == "") return;
+    infoList.push(el("infoText").value);
+    el("infoText").value = "";
+    refresh();
+  }
+
+  function showInfoTable() {
+    var html = "<tr><th>Information</th><th>Action</th></tr>";
+    for (var i = 0; i < infoList.length; i++) html += "<tr><td>" + infoList[i] + "</td><td><button onclick='removeInfo(" + i + ")'>Delete</button></td></tr>";
+    el("infoTable").innerHTML = html;
+  }
+
+  function removeInfo(i) {
+    infoList.splice(i, 1);
+    refresh();
+  }
+
+  function saveContact() {
+    if (el("adPhone").value != "") contact.phone = el("adPhone").value;
+    if (el("adEmail").value != "") contact.email = el("adEmail").value;
+    if (el("adOffice").value != "") contact.office = el("adOffice").value;
+    alert("Contact details updated");
+  }
+
+</script>
+
+</body>
+</html>

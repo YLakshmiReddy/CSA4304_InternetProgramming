@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On Road Vehicle Breakdown Assistance</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛠️ RoadHelp</h1>
+  <p>Find a licensed mechanic near you</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="user">Vehicle Owner (User)</option>
+    <option value="mechanic">Mechanic</option>
+    <option value="admin">Admin</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="hide('loginBox'); show('registerBox')">Register</button>
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Driver: driver / 1234<br>Mechanic: mechanic / 1234</div>
+</div>
+
+<!-- Register -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Register</h2>
+  <select id="regRole">
+    <option value="user">Register as Vehicle Owner</option>
+    <option value="mechanic">Register as Mechanic</option>
+  </select><br>
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="regPhone" placeholder="Phone number"><br>
+  <input type="text" id="regLicense" placeholder="Licence number (mechanics only)"><br>
+  <button onclick="register()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+
+<!-- User dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>🚗 Driver Dashboard</h2>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uSearch')">🔍 Search Mechanic</button>
+    <button onclick="openTab('userBox','uMap')">📍 Google Location</button>
+    <button onclick="openTab('userBox','uFeedback')">💬 Post Feedback</button>
+    <button onclick="openTab('userBox','uProfile')">👤 My Profile</button>
+  </nav>
+
+  <div id="uSearch" class="tab">
+    <h3>Search Mechanics Near You</h3>
+    <input type="text" id="sLocation" placeholder="Your location (area or city)">
+    <select id="sService" style="width:200px"></select>
+    <select id="sVehicle" style="width:150px"><option value="">Any vehicle</option><option>Car</option><option>Bike</option><option>Truck</option></select>
+    <label><input type="checkbox" id="s24" style="width:auto"> 24 x 7 only</label>
+    <button onclick="searchMechanics()">Search</button>
+    <table id="mechanicTable"></table>
+  </div>
+
+  <div id="uMap" class="tab hidden">
+    <h3>View Google Geo Location</h3>
+    <select id="mapMechanic" style="width:380px" onchange="showMechanicMap()"></select>
+    <div id="mapBox"></div>
+  </div>
+
+  <div id="uFeedback" class="tab hidden">
+    <h3>Post Feedback About a Mechanic</h3>
+    <select id="fbMechanic" style="width:380px"></select>
+    <select id="fbRating" style="width:140px">
+      <option value="5">5 - Excellent</option><option value="4">4 - Good</option><option value="3">3 - Average</option><option value="2">2 - Poor</option><option value="1">1 - Very Poor</option>
+    </select>
+    <textarea id="fbText" rows="3" placeholder="Write your feedback"></textarea>
+    <button onclick="sendFeedback()">Submit Feedback</button>
+  </div>
+
+  <div id="uProfile" class="tab hidden">
+    <h3>My Profile</h3>
+    <input type="text" id="pName" placeholder="Name"><br>
+    <input type="text" id="pPhone" placeholder="Phone"><br>
+    <input type="text" id="pVehicleNo" placeholder="Vehicle number"><br>
+    <select id="pVehicleType"><option>Car</option><option>Bike</option><option>Truck</option></select><br>
+    <input type="password" id="pPass" placeholder="Password"><br>
+    <button onclick="saveProfile()">Update Profile</button>
+  </div>
+</div>
+
+<!-- Mechanic dashboard -->
+<div id="mechanicBox" class="box hidden">
+  <h2>🔧 Mechanic Dashboard</h2>
+  <div class="stats" id="mechanicStats"></div>
+  <nav>
+    <button onclick="openTab('mechanicBox','mPost')">🏪 Post Business</button>
+    <button onclick="openTab('mechanicBox','mManage')">🛠️ Manage Business</button>
+    <button onclick="openTab('mechanicBox','mFeedback')">💬 View Feedback</button>
+  </nav>
+
+  <div id="mPost" class="tab">
+    <h3 id="postTitle">Post Your Business</h3>
+    <input type="text" id="bName" placeholder="Garage / business name">
+    <input type="text" id="bArea" placeholder="Area">
+    <input type="text" id="bCity" placeholder="City" style="width:150px">
+    <input type="text" id="bAddress" placeholder="Full address" style="width:320px"><br>
+    <input type="text" id="bPhone" placeholder="Contact number">
+    <input type="number" id="bCharge" placeholder="Visit charge (Rs)" style="width:160px">
+    <label><input type="checkbox" id="b24" style="width:auto"> Open 24 x 7</label><br>
+    Services: <span id="serviceChecks"></span><br>
+    Vehicles: <label><input type="checkbox" class="veh" value="Car" style="width:auto"> Car</label>
+    <label><input type="checkbox" class="veh" value="Bike" style="width:auto"> Bike</label>
+    <label><input type="checkbox" class="veh" value="Truck" style="width:auto"> Truck</label><br>
+    <button onclick="saveBusiness()">Save Business</button>
+    <button onclick="clearBusinessForm()">Clear</button>
+    <p class="msg" id="businessMsg"></p>
+  </div>
+
+  <div id="mManage" class="tab hidden">
+    <h3>My Businesses</h3>
+    <table id="myBusinessTable"></table>
+  </div>
+
+  <div id="mFeedback" class="tab hidden">
+    <h3>Feedback from Customers</h3>
+    <table id="myFeedbackTable"></table>
+  </div>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Admin Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aApprove')">✅ Provide Approval</button>
+  </nav>
+
+  <div id="aApprove" class="tab">
+    <h3>Mechanics and Licences</h3>
+    <table id="mechanicApprovalTable"></table>
+  </div>
+</div>
+
+
+</main>
+
+<footer>© 2026 RoadHelp | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "Admin", username: "admin", password: "admin123", role: "admin", phone: "" },
+    { name: "Test Driver", username: "driver", password: "1234", role: "user", phone: "9876543210", vehicleNo: "TN01AB1234", vehicleType: "Car", license: "", status: "Approved" },
+    { name: "Murugan Mechanic", username: "mechanic", password: "1234", role: "mechanic", phone: "9840011122", vehicleNo: "", vehicleType: "", license: "TN-MECH-2024-0456", status: "Approved" }
+  ];
+  var currentUser = null;
+  var BOXES = ["userBox", "mechanicBox", "adminBox"];
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function badge(text) {
+    var color = "orange";
+    if (/^(Approved|Active|Resolved|Completed|Confirmed|Available|Delivered|Paid|Open|Shortlisted|Selected|Done|Collected|Voted)$/.test(text)) color = "green";
+    if (/^(Rejected|Cancelled|Closed|Pending Payment Due|Full|Overdue|Unpaid|Declined|Removed)$/.test(text)) color = "red";
+    return "<span class='badge " + color + "'>" + text + "</span>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function mapHtml(query) {
+    var q = encodeURIComponent(query);
+    return "<iframe class='map' src='https://maps.google.com/maps?q=" + q + "&output=embed'></iframe>" +
+      "<p><a href='https://www.google.com/maps/search/?api=1&query=" + q + "' target='_blank'>Open in Google Maps</a></p>";
+  }
+
+  // ---------- Login / Register ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        if (typeof canLogin == "function") {
+          var block = canLogin(users[i]);
+          if (block != "") {
+            el("loginMsg").innerText = block;
+            return;
+          }
+        }
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        startSession(r);
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function register() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("regMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    var account = { name: name, username: user, password: pass, role: el("regRole").value };
+    account.phone = el("regPhone").value;
+    account.license = el("regLicense").value;
+    if (typeof checkRegistration == "function") {
+      var problem = checkRegistration(account);
+      if (problem != "") {
+        el("regMsg").innerText = problem;
+        return;
+      }
+    }
+    users.push(account);
+    if (typeof afterRegister == "function") afterRegister(account);
+    alert("Registration successful. Please login.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    for (var i = 0; i < BOXES.length; i++) hide(BOXES[i]);
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+
+  // ---------- Data ----------
+  var SERVICES = ["Puncture repair", "Battery jump start", "Towing", "Engine repair", "Fuel delivery", "Electrical work", "Brake repair"];
+  var businesses = [
+    { id: 1, owner: "mechanic", name: "Murugan Auto Care", area: "Adyar", city: "Chennai", address: "21 Gandhi Nagar Main Road, Adyar, Chennai", phone: "9840011122", charge: 300, open24: true, services: ["Puncture repair", "Battery jump start", "Towing", "Engine repair"], vehicles: ["Car", "Bike"] },
+    { id: 2, owner: "other", name: "Speedy Bike Works", area: "T Nagar", city: "Chennai", address: "5 Usman Road, T Nagar, Chennai", phone: "9840033344", charge: 150, open24: false, services: ["Puncture repair", "Electrical work", "Brake repair"], vehicles: ["Bike"] },
+    { id: 3, owner: "other2", name: "Highway Truck Garage", area: "Perungudi", city: "Chennai", address: "OMR Highway, Perungudi, Chennai", phone: "9840055566", charge: 600, open24: true, services: ["Towing", "Engine repair", "Fuel delivery", "Brake repair"], vehicles: ["Truck", "Car"] }
+  ];
+  var feedbacks = [];
+  var nextBusinessId = 4;
+  var editBusinessId = 0;
+
+  function canLogin(u) {
+    if (u.role == "mechanic" && u.status != "Approved") return u.status == "Rejected" ? "Your licence was rejected by the admin" : "Your licence is waiting for admin approval";
+    return "";
+  }
+
+  function checkRegistration(account) {
+    if (account.role == "mechanic" && el("regLicense").value == "") return "Mechanics must enter the licence number";
+    return "";
+  }
+
+  function afterRegister(account) {
+    account.status = account.role == "mechanic" ? "Pending" : "Approved";
+    account.vehicleNo = account.vehicleNo || "";
+    account.vehicleType = account.vehicleType || "Car";
+  }
+
+  function startSession(role) {
+    if (role == "admin") {
+      show("adminBox");
+      openTab("adminBox", "aApprove");
+    } else if (role == "mechanic") {
+      buildServiceChecks();
+      show("mechanicBox");
+      openTab("mechanicBox", "mPost");
+    } else {
+      el("pName").value = currentUser.name;
+      el("pPhone").value = currentUser.phone;
+      el("pVehicleNo").value = currentUser.vehicleNo;
+      el("pVehicleType").value = currentUser.vehicleType;
+      el("pPass").value = currentUser.password;
+      show("userBox");
+      openTab("userBox", "uSearch");
+    }
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      showApprovals();
+    } else if (currentUser.role == "mechanic") {
+      showMechanicStats();
+      showMyBusinesses();
+      showMyFeedback();
+    } else {
+      showUserStats();
+      fillLists();
+      searchMechanics();
+    }
+  }
+
+  function rating(businessId) {
+    var total = 0, count = 0;
+    for (var i = 0; i < feedbacks.length; i++) {
+      if (feedbacks[i].businessId == businessId) { total += feedbacks[i].rating; count++; }
+    }
+    return count == 0 ? "No ratings" : "⭐ " + (total / count).toFixed(1) + " (" + count + ")";
+  }
+
+  // only businesses of approved (licensed) mechanics are listed
+  function licensedBusinesses() {
+    var list = [];
+    for (var i = 0; i < businesses.length; i++) {
+      var owner = findUser(businesses[i].owner);
+      if (!owner || owner.status == "Approved") list.push(businesses[i]);
+    }
+    return list;
+  }
+
+  // ---------- User ----------
+  function fillLists() {
+    var list = licensedBusinesses();
+    if (el("sService").options.length != SERVICES.length + 1) {
+      var s = "<option value=''>Any service</option>";
+      for (var i = 0; i < SERVICES.length; i++) s += "<option>" + SERVICES[i] + "</option>";
+      el("sService").innerHTML = s;
+    }
+    var options = "";
+    for (var j = 0; j < list.length; j++) options += "<option value='" + list[j].id + "'>" + list[j].name + " - " + list[j].area + ", " + list[j].city + "</option>";
+    if (el("mapMechanic").options.length != list.length) {
+      el("mapMechanic").innerHTML = options;
+      el("fbMechanic").innerHTML = options;
+    }
+  }
+
+  function searchMechanics() {
+    var place = el("sLocation").value.toLowerCase();
+    var service = el("sService").value;
+    var vehicle = el("sVehicle").value;
+    var only24 = el("s24").checked;
+    var html = "<tr><th>Garage</th><th>Location</th><th>Services</th><th>Vehicles</th><th>Charge</th><th>Rating</th><th>Contact</th><th>Action</th></tr>";
+    var count = 0;
+    var list = licensedBusinesses();
+    for (var i = 0; i < list.length; i++) {
+      var b = list[i];
+      var ok = (b.area + " " + b.city + " " + b.address).toLowerCase().indexOf(place) != -1;
+      if (service != "" && b.services.indexOf(service) == -1) ok = false;
+      if (vehicle != "" && b.vehicles.indexOf(vehicle) == -1) ok = false;
+      if (only24 && !b.open24) ok = false;
+      if (ok) {
+        count++;
+        html += "<tr><td><b>" + b.name + "</b>" + (b.open24 ? "<br><span class='badge green'>24 x 7</span>" : "") + "</td><td>" + b.area + ", " + b.city + "</td><td><small>" + b.services.join(", ") + "</small></td><td>" + b.vehicles.join(", ") +
+          "</td><td>" + money(b.charge) + "</td><td>" + rating(b.id) + "</td><td>" + b.phone + "</td><td><button onclick='openMap(" + b.id + ")'>📍 Map</button></td></tr>";
+      }
+    }
+    if (count == 0) html += "<tr><td colspan='8'>No licensed mechanics found for this search</td></tr>";
+    el("mechanicTable").innerHTML = html;
+  }
+
+  function openMap(id) {
+    openTab("userBox", "uMap");
+    el("mapMechanic").value = id;
+    showMechanicMap();
+  }
+
+  function showMechanicMap() {
+    var b = findById(businesses, el("mapMechanic").value);
+    if (!b) return;
+    el("mapBox").innerHTML = "<h4>" + b.name + "</h4><p>" + b.address + " | 📞 " + b.phone + "</p>" + mapHtml(b.name + ", " + b.address);
+  }
+
+  function sendFeedback() {
+    var id = el("fbMechanic").value;
+    if (id == "" || el("fbText").value == "") {
+      alert("Choose a mechanic and write your feedback");
+      return;
+    }
+    feedbacks.push({ businessId: parseInt(id), user: currentUser.name, rating: parseInt(el("fbRating").value), text: el("fbText").value, date: today() });
+    el("fbText").value = "";
+    alert("Thank you for your feedback");
+    refresh();
+  }
+
+  function saveProfile() {
+    if (el("pName").value == "" || el("pPass").value == "") {
+      alert("Name and password cannot be empty");
+      return;
+    }
+    currentUser.name = el("pName").value;
+    currentUser.phone = el("pPhone").value;
+    currentUser.vehicleNo = el("pVehicleNo").value.toUpperCase();
+    currentUser.vehicleType = el("pVehicleType").value;
+    currentUser.password = el("pPass").value;
+    alert("Profile updated");
+  }
+
+  function showUserStats() {
+    var list = licensedBusinesses();
+    var open24 = 0, mine = 0;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].open24) open24++;
+    }
+    for (var j = 0; j < feedbacks.length; j++) {
+      if (feedbacks[j].user == currentUser.name) mine++;
+    }
+    el("userStats").innerHTML = statBox("s1", list.length, "Licensed Mechanics") + statBox("s2", open24, "Open 24 x 7") + statBox("s3", mine, "My Feedback");
+  }
+
+  // ---------- Mechanic ----------
+  function buildServiceChecks() {
+    if (el("serviceChecks").innerHTML != "") return;
+    var html = "";
+    for (var i = 0; i < SERVICES.length; i++) html += "<label><input type='checkbox' class='svc' value='" + SERVICES[i] + "' style='width:auto'> " + SERVICES[i] + "</label> ";
+    el("serviceChecks").innerHTML = html;
+  }
+
+  function checked(className) {
+    var list = [];
+    var boxes = document.getElementsByClassName(className);
+    for (var i = 0; i < boxes.length; i++) {
+      if (boxes[i].checked) list.push(boxes[i].value);
+    }
+    return list;
+  }
+
+  function saveBusiness() {
+    var charge = parseInt(el("bCharge").value);
+    var services = checked("svc");
+    var vehicles = checked("veh");
+    if (el("bName").value == "" || el("bArea").value == "" || el("bCity").value == "" || el("bPhone").value == "" || isNaN(charge)) {
+      el("businessMsg").innerText = "Please enter the name, area, city, phone and visit charge";
+      return;
+    }
+    if (services.length == 0 || vehicles.length == 0) {
+      el("businessMsg").innerText = "Select at least one service and one vehicle type";
+      return;
+    }
+    var data = {
+      owner: currentUser.username, name: el("bName").value, area: el("bArea").value, city: el("bCity").value, address: el("bAddress").value || (el("bArea").value + ", " + el("bCity").value),
+      phone: el("bPhone").value, charge: charge, open24: el("b24").checked, services: services, vehicles: vehicles
+    };
+    if (editBusinessId == 0) {
+      data.id = nextBusinessId++;
+      businesses.push(data);
+    } else {
+      data.id = editBusinessId;
+      businesses[businesses.indexOf(findById(businesses, editBusinessId))] = data;
+    }
+    clearBusinessForm();
+    el("mapMechanic").innerHTML = "";
+    alert("Business saved. Customers can now find you in the search.");
+    openTab("mechanicBox", "mManage");
+  }
+
+  function clearBusinessForm() {
+    var ids = ["bName", "bArea", "bCity", "bAddress", "bPhone", "bCharge"];
+    for (var i = 0; i < ids.length; i++) el(ids[i]).value = "";
+    el("b24").checked = false;
+    var boxes = document.querySelectorAll(".svc, .veh");
+    for (var j = 0; j < boxes.length; j++) boxes[j].checked = false;
+    editBusinessId = 0;
+    el("businessMsg").innerText = "";
+    el("postTitle").innerText = "Post Your Business";
+  }
+
+  function editBusiness(id) {
+    var b = findById(businesses, id);
+    editBusinessId = id;
+    el("bName").value = b.name;
+    el("bArea").value = b.area;
+    el("bCity").value = b.city;
+    el("bAddress").value = b.address;
+    el("bPhone").value = b.phone;
+    el("bCharge").value = b.charge;
+    el("b24").checked = b.open24;
+    var boxes = document.querySelectorAll(".svc, .veh");
+    for (var i = 0; i < boxes.length; i++) boxes[i].checked = b.services.indexOf(boxes[i].value) != -1 || b.vehicles.indexOf(boxes[i].value) != -1;
+    el("postTitle").innerText = "Update Business: " + b.name;
+    openTab("mechanicBox", "mPost");
+  }
+
+  function deleteBusiness(id) {
+    if (!confirm("Delete this business?")) return;
+    businesses.splice(businesses.indexOf(findById(businesses, id)), 1);
+    refresh();
+  }
+
+  function showMyBusinesses() {
+    var html = "<tr><th>Garage</th><th>Location</th><th>Services</th><th>Charge</th><th>Rating</th><th>Action</th></tr>";
+    for (var i = 0; i < businesses.length; i++) {
+      var b = businesses[i];
+      if (b.owner == currentUser.username) {
+        html += "<tr><td><b>" + b.name + "</b><br><small>" + b.phone + (b.open24 ? " | 24 x 7" : "") + "</small></td><td>" + b.area + ", " + b.city + "</td><td><small>" + b.services.join(", ") + "</small></td><td>" + money(b.charge) + "</td><td>" + rating(b.id) +
+          "</td><td><button onclick='editBusiness(" + b.id + ")'>Update</button><button onclick='deleteBusiness(" + b.id + ")'>Delete</button></td></tr>";
+      }
+    }
+    el("myBusinessTable").innerHTML = html;
+  }
+
+  function showMyFeedback() {
+    var html = "<tr><th>Date</th><th>Garage</th><th>Customer</th><th>Rating</th><th>Feedback</th></tr>";
+    for (var i = 0; i < feedbacks.length; i++) {
+      var f = feedbacks[i];
+      var b = findById(businesses, f.businessId);
+      if (b && b.owner == currentUser.username) html += "<tr><td>" + f.date + "</td><td>" + b.name + "</td><td>" + f.user + "</td><td>" + "⭐".repeat(f.rating) + "</td><td>" + f.text + "</td></tr>";
+    }
+    el("myFeedbackTable").innerHTML = html;
+  }
+
+  function showMechanicStats() {
+    var mine = 0, count = 0;
+    for (var i = 0; i < businesses.length; i++) {
+      if (businesses[i].owner == currentUser.username) mine++;
+    }
+    for (var j = 0; j < feedbacks.length; j++) {
+      var b = findById(businesses, feedbacks[j].businessId);
+      if (b && b.owner == currentUser.username) count++;
+    }
+    el("mechanicStats").innerHTML = statBox("s1", mine, "My Businesses") + statBox("s2", count, "Feedbacks") + statBox("s3", currentUser.license, "Licence No");
+  }
+
+  // ---------- Admin ----------
+  function showAdminStats() {
+    var pending = 0, approved = 0, drivers = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "mechanic") { if (users[i].status == "Pending") pending++; if (users[i].status == "Approved") approved++; }
+      if (users[i].role == "user") drivers++;
+    }
+    el("adminStats").innerHTML = statBox("s4", pending, "Waiting Approval") + statBox("s2", approved, "Licensed Mechanics") + statBox("s1", drivers, "Drivers") + statBox("s3", businesses.length, "Businesses");
+  }
+
+  function showApprovals() {
+    var html = "<tr><th>Mechanic</th><th>Phone</th><th>Licence Number</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      var m = users[i];
+      if (m.role == "mechanic") {
+        html += "<tr><td>" + m.name + "<br><small>" + m.username + "</small></td><td>" + m.phone + "</td><td>" + m.license + "</td><td>" + badge(m.status) + "</td><td>";
+        if (m.status == "Pending") html += "<button onclick='setMechanic(\"" + m.username + "\", \"Approved\")'>Approve</button><button onclick='setMechanic(\"" + m.username + "\", \"Rejected\")'>Reject</button>";
+        html += "</td></tr>";
+      }
+    }
+    el("mechanicApprovalTable").innerHTML = html;
+  }
+
+  function setMechanic(username, status) {
+    findUser(username).status = status;
+    refresh();
+  }
+
+</script>
+
+</body>
+</html>

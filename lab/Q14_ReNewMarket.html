@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReNewMarket - Second Hand Marketplace</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♻️ ReNewMarket</h1>
+  <p>Buy and sell second hand goods safely</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="user">User (Buyer / Seller)</option>
+    <option value="admin">Admin</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="hide('loginBox'); show('registerBox')">Register</button>
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Seller: seller / 1234<br>Buyer: buyer / 1234</div>
+</div>
+
+<!-- Register -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Register</h2>
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="regCity" placeholder="City"><br>
+  <button onclick="register()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+<!-- User dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>🛒 My Marketplace</h2>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uBrowse')">🛍️ Browse</button>
+    <button onclick="openTab('userBox','uSell')">➕ Sell an Item</button>
+    <button onclick="openTab('userBox','uFav')">❤️ Favorites</button>
+    <button onclick="openTab('userBox','uOffers')">🤝 Offers</button>
+    <button onclick="openTab('userBox','uBuys')">📦 My Purchases</button>
+    <button onclick="openTab('userBox','uSales')">💰 My Sales</button>
+    <button onclick="openTab('userBox','uNotes')">🔔 Notifications</button>
+  </nav>
+
+  <div id="uBrowse" class="tab">
+    <h3>Browse Items</h3>
+    <input type="text" id="sText" placeholder="Search items">
+    <select id="sCat"></select>
+    <select id="sCond" style="width:160px">
+      <option value="">Any condition</option>
+      <option>Like New</option>
+      <option>Good</option>
+      <option>Fair</option>
+    </select>
+    <input type="number" id="sMax" placeholder="Max price (Rs)" style="width:160px">
+    <button onclick="showItems()">Search</button>
+    <div class="grid" id="itemGrid"></div>
+    <div id="detailBox"></div>
+  </div>
+
+  <div id="uSell" class="tab hidden">
+    <h3 id="sellTitle">List an Item for Sale</h3>
+    <input type="text" id="iTitle" placeholder="Item title">
+    <select id="iCat"></select>
+    <input type="number" id="iPrice" placeholder="Price (Rs)" style="width:140px">
+    <select id="iCond" style="width:140px"><option>Like New</option><option>Good</option><option>Fair</option></select>
+    <input type="text" id="iLocation" placeholder="Your location">
+    <select id="iDelivery" style="width:200px">
+      <option>Pick-up or Delivery</option>
+      <option>Pick-up only</option>
+      <option>Delivery only</option>
+    </select><br>
+    <textarea id="iDesc" rows="2" placeholder="Describe the item"></textarea>
+    Photo: <input type="file" id="iPhoto" accept="image/*"><br>
+    <button onclick="saveItem()">Save Item</button>
+    <button onclick="clearItemForm()">Clear</button>
+    <p class="msg" id="sellMsg"></p>
+    <h3>My Listings</h3>
+    <table id="myItemTable"></table>
+  </div>
+
+  <div id="uFav" class="tab hidden">
+    <h3>Favorite Items</h3>
+    <table id="favTable"></table>
+  </div>
+
+  <div id="uOffers" class="tab hidden">
+    <h3>Offers Received on My Items</h3>
+    <table id="receivedTable"></table>
+    <h3>Offers I Made</h3>
+    <table id="sentTable"></table>
+  </div>
+
+  <div id="uBuys" class="tab hidden">
+    <h3>My Purchases and Delivery Status</h3>
+    <table id="buyTable"></table>
+  </div>
+
+  <div id="uSales" class="tab hidden">
+    <h3>My Sales</h3>
+    <table id="saleTable"></table>
+  </div>
+
+  <div id="uNotes" class="tab hidden">
+    <h3>Notifications</h3>
+    <table id="noteTable"></table>
+  </div>
+</div>
+
+<!-- Checkout panel for the buyer -->
+<div id="buyBox" class="box hidden">
+  <h2>💳 Secure Checkout</h2>
+  <div id="buySummary" class="info"></div>
+  <select id="bMethod" style="width:200px" onchange="toggleAddress()">
+    <option>Delivery</option>
+    <option>Pick-up</option>
+  </select><br>
+  <textarea id="bAddress" rows="2" placeholder="Delivery address"></textarea>
+  <select id="bPay" style="width:220px">
+    <option>Credit / Debit Card</option>
+    <option>UPI</option>
+    <option>Net Banking</option>
+  </select><br>
+  <button onclick="confirmBuy()">Pay &amp; Place Order</button>
+  <button onclick="hide('buyBox'); show('userBox')">Cancel</button>
+  <p class="msg" id="buyMsg"></p>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Admin Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aUsers')">👥 Users</button>
+    <button onclick="openTab('adminBox','aCats')">🏷️ Categories</button>
+    <button onclick="openTab('adminBox','aItems')">📦 Commodities</button>
+    <button onclick="openTab('adminBox','aOrders')">🚚 Orders</button>
+  </nav>
+
+  <div id="aUsers" class="tab">
+    <h3 id="userFormTitle">Add User (set login account)</h3>
+    <input type="text" id="uName" placeholder="Name">
+    <input type="text" id="uUser" placeholder="Username">
+    <input type="password" id="uPass" placeholder="Password">
+    <input type="text" id="uCity" placeholder="City">
+    <button onclick="saveUser()">Save User</button>
+    <button onclick="clearUserForm()">Clear</button>
+    <p class="msg" id="userMsg"></p>
+    <table id="userTable"></table>
+  </div>
+
+  <div id="aCats" class="tab hidden">
+    <h3>Add Category</h3>
+    <input type="text" id="catName" placeholder="Category name">
+    <button onclick="addCategory()">Add</button>
+    <table id="catTable"></table>
+  </div>
+
+  <div id="aItems" class="tab hidden">
+    <h3>All Commodities</h3>
+    <table id="adminItemTable"></table>
+  </div>
+
+  <div id="aOrders" class="tab hidden">
+    <h3>Order Management</h3>
+    <table id="adminOrderTable"></table>
+  </div>
+</div>
+
+</main>
+
+<footer>© 2026 ReNewMarket | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "Market Admin", username: "admin", password: "admin123", role: "admin", city: "Chennai" },
+    { name: "Suresh Seller", username: "seller", password: "1234", role: "user", city: "Chennai" },
+    { name: "Bala Buyer", username: "buyer", password: "1234", role: "user", city: "Madurai" }
+  ];
+
+  var categories = ["Electronics", "Furniture", "Books", "Clothing", "Sports", "Vehicles"];
+
+  var items = [
+    { id: 1, title: "Samsung 43 inch Smart TV", category: "Electronics", price: 14000, condition: "Good", desc: "2 years old, remote and stand included.", seller: "seller", location: "Chennai", delivery: "Pick-up or Delivery", img: "📺", status: "Available" },
+    { id: 2, title: "Wooden Study Table", category: "Furniture", price: 3500, condition: "Like New", desc: "Teak wood table with two drawers.", seller: "seller", location: "Chennai", delivery: "Pick-up only", img: "🪑", status: "Available" },
+    { id: 3, title: "Engineering Mathematics Books (Set of 3)", category: "Books", price: 600, condition: "Good", desc: "Latest edition, no torn pages.", seller: "seller", location: "Chennai", delivery: "Pick-up or Delivery", img: "📚", status: "Available" },
+    { id: 4, title: "Hero Cycle 21 Gear", category: "Sports", price: 4500, condition: "Fair", desc: "Used for one year, new tyres.", seller: "buyer", location: "Madurai", delivery: "Pick-up only", img: "🚲", status: "Available" },
+    { id: 5, title: "Honda Activa 2018", category: "Vehicles", price: 38000, condition: "Good", desc: "Single owner, 25,000 km.", seller: "buyer", location: "Madurai", delivery: "Pick-up only", img: "🛵", status: "Available" }
+  ];
+
+  var offers = [];
+  var orders = [];
+  var feedbacks = [];
+  var favorites = {};
+  var notes = [];
+  var nextItemId = 6;
+  var nextOfferId = 1;
+  var nextOrderId = 5001;
+  var currentUser = null;
+  var buyItem = null;
+  var buyPrice = 0;
+  var editItemId = 0;
+  var editUserName = "";
+  var photoData = "";
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function userName(username) {
+    var u = findUser(username);
+    return u ? u.name : username + " (removed)";
+  }
+
+  function notify(username, text) {
+    notes.push({ user: username, text: text, date: today() });
+  }
+
+  function sellerRating(username) {
+    var total = 0, count = 0;
+    for (var i = 0; i < feedbacks.length; i++) {
+      if (feedbacks[i].seller == username) { total += feedbacks[i].rating; count++; }
+    }
+    return count == 0 ? "No ratings yet" : "⭐ " + (total / count).toFixed(1) + " (" + count + " reviews)";
+  }
+
+  function badge(text) {
+    var color = "orange";
+    if (text == "Available" || text == "Accepted" || text == "Received") color = "green";
+    if (text == "Sold" || text == "Rejected") color = "red";
+    return "<span class='badge " + color + "'>" + text + "</span>";
+  }
+
+  function picHtml(it) {
+    return it.img.indexOf("data:") == 0 ? "<img src='" + it.img + "'>" : "<div class='pic'>" + it.img + "</div>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      showUsers();
+      showCategories();
+      showAdminItems();
+      showAdminOrders();
+    } else {
+      showUserStats();
+      fillCategoryLists();
+      showItems();
+      showMyItems();
+      showFavorites();
+      showOffers();
+      showPurchases();
+      showSales();
+      showNotes();
+    }
+  }
+
+  // ---------- Login / Register ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        if (r == "admin") {
+          show("adminBox");
+          openTab("adminBox", "aUsers");
+        } else {
+          show("userBox");
+          openTab("userBox", "uBrowse");
+        }
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function register() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("regMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    users.push({ name: name, username: user, password: pass, role: "user", city: el("regCity").value });
+    alert("Registration successful. Please login.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    hide("adminBox");
+    hide("userBox");
+    hide("buyBox");
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+  // ---------- Browse and search ----------
+  function fillCategoryLists() {
+    if (el("iCat").options.length == categories.length && el("sCat").options.length == categories.length + 1) return;
+    var current = el("sCat").value;
+    var all = "<option value=''>All categories</option>";
+    var only = "";
+    for (var i = 0; i < categories.length; i++) {
+      all += "<option>" + categories[i] + "</option>";
+      only += "<option>" + categories[i] + "</option>";
+    }
+    el("sCat").innerHTML = all;
+    el("sCat").value = current;
+    el("iCat").innerHTML = only;
+  }
+
+  function showItems() {
+    var text = el("sText").value.toLowerCase();
+    var cat = el("sCat").value;
+    var cond = el("sCond").value;
+    var max = el("sMax").value;
+    var html = "";
+    var count = 0;
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      var ok = (it.title + it.desc).toLowerCase().indexOf(text) != -1;
+      if (cat != "" && it.category != cat) ok = false;
+      if (cond != "" && it.condition != cond) ok = false;
+      if (max != "" && it.price > parseInt(max)) ok = false;
+      if (ok) {
+        count++;
+        html += "<div class='card'>" + picHtml(it) + "<h4>" + it.title + "</h4><small>" + it.category + " | " + it.condition + " | " + it.location + "</small><br>" +
+          "<span class='price'>" + money(it.price) + "</span><br>" + badge(it.status) + "<br>" +
+          "<button onclick='showDetail(" + it.id + ")'>Details</button><button onclick='addFavorite(" + it.id + ")'>❤️</button></div>";
+      }
+    }
+    if (count == 0) html = "<p>No items found</p>";
+    el("itemGrid").innerHTML = html;
+  }
+
+  function acceptedOffer(itemId) {
+    for (var i = 0; i < offers.length; i++) {
+      if (offers[i].itemId == itemId && offers[i].buyer == currentUser.username && offers[i].status == "Accepted") return offers[i];
+    }
+  }
+
+  function showDetail(id) {
+    var it = findById(items, id);
+    var html = "<div class='info'><h3>" + it.title + "</h3>" + picHtml(it) + "<p>" + it.desc + "</p>" +
+      "<p>Category: " + it.category + " | Condition: " + it.condition + " | Location: " + it.location + "<br>Delivery: " + it.delivery + "</p>" +
+      "<p>Seller: <b>" + userName(it.seller) + "</b> - " + sellerRating(it.seller) + "</p><p><b>Asking price: " + money(it.price) + "</b> " + badge(it.status) + "</p>";
+    if (it.seller == currentUser.username) {
+      html += "<p>This is your own listing.</p>";
+    } else if (it.status == "Available") {
+      var deal = acceptedOffer(id);
+      if (deal) html += "<button onclick='startBuy(" + id + ", " + deal.amount + ")'>Buy at agreed price " + money(deal.amount) + "</button> ";
+      html += "<button onclick='startBuy(" + id + ", " + it.price + ")'>Buy Now</button> ";
+      html += "<input type='number' id='offerAmount' placeholder='Your offer (Rs)' style='width:160px'> <button onclick='makeOffer(" + id + ")'>Make Offer</button>";
+    }
+    el("detailBox").innerHTML = html + "</div>";
+    el("detailBox").scrollIntoView();
+  }
+
+  // ---------- Favorites ----------
+  function addFavorite(id) {
+    if (!favorites[currentUser.username]) favorites[currentUser.username] = [];
+    if (favorites[currentUser.username].indexOf(id) != -1) {
+      alert("Already in your favorites");
+      return;
+    }
+    favorites[currentUser.username].push(id);
+    alert("Added to favorites");
+    refresh();
+  }
+
+  function showFavorites() {
+    var list = favorites[currentUser.username] || [];
+    var html = "<tr><th>Item</th><th>Price</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < list.length; i++) {
+      var it = findById(items, list[i]);
+      if (it) {
+        html += "<tr><td>" + it.title + "</td><td>" + money(it.price) + "</td><td>" + badge(it.status) +
+          "</td><td><button onclick='viewFromFavorite(" + it.id + ")'>View</button><button onclick='removeFavorite(" + i + ")'>Remove</button></td></tr>";
+      }
+    }
+    el("favTable").innerHTML = html;
+  }
+
+  function viewFromFavorite(id) {
+    openTab("userBox", "uBrowse");
+    showDetail(id);
+  }
+
+  function removeFavorite(i) {
+    favorites[currentUser.username].splice(i, 1);
+    refresh();
+  }
+
+  // ---------- Selling ----------
+  el("iPhoto").onchange = function () {
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () { photoData = reader.result; };
+    reader.readAsDataURL(file);
+  };
+
+  function saveItem() {
+    var title = el("iTitle").value;
+    var price = parseInt(el("iPrice").value);
+    if (title == "" || isNaN(price) || price <= 0 || el("iLocation").value == "") {
+      el("sellMsg").innerText = "Please enter title, price and location";
+      return;
+    }
+    var icons = { "Electronics": "📺", "Furniture": "🪑", "Books": "📚", "Clothing": "👕", "Sports": "⚽", "Vehicles": "🛵" };
+    var cat = el("iCat").value;
+    var data = {
+      title: title, category: cat, price: price, condition: el("iCond").value, desc: el("iDesc").value, seller: currentUser.username,
+      location: el("iLocation").value, delivery: el("iDelivery").value, img: photoData != "" ? photoData : (icons[cat] || "📦"), status: "Available"
+    };
+    if (editItemId == 0) {
+      data.id = nextItemId++;
+      items.push(data);
+    } else {
+      var old = findById(items, editItemId);
+      if (photoData == "") data.img = old.img;
+      data.id = editItemId;
+      data.status = old.status;
+      items[items.indexOf(old)] = data;
+    }
+    clearItemForm();
+    refresh();
+  }
+
+  function clearItemForm() {
+    var ids = ["iTitle", "iPrice", "iLocation", "iDesc", "iPhoto"];
+    for (var i = 0; i < ids.length; i++) el(ids[i]).value = "";
+    editItemId = 0;
+    photoData = "";
+    el("sellMsg").innerText = "";
+    el("sellTitle").innerText = "List an Item for Sale";
+  }
+
+  function showMyItems() {
+    var html = "<tr><th>Item</th><th>Category</th><th>Price</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (it.seller == currentUser.username) {
+        html += "<tr><td>" + it.title + "</td><td>" + it.category + "</td><td>" + money(it.price) + "</td><td>" + badge(it.status) + "</td><td>";
+        if (it.status == "Available") html += "<button onclick='editItem(" + it.id + ")'>Edit</button><button onclick='deleteItem(" + it.id + ")'>Delete</button>";
+        html += "</td></tr>";
+      }
+    }
+    el("myItemTable").innerHTML = html;
+  }
+
+  function editItem(id) {
+    var it = findById(items, id);
+    editItemId = id;
+    el("iTitle").value = it.title;
+    el("iCat").value = it.category;
+    el("iPrice").value = it.price;
+    el("iCond").value = it.condition;
+    el("iLocation").value = it.location;
+    el("iDelivery").value = it.delivery;
+    el("iDesc").value = it.desc;
+    el("sellTitle").innerText = "Edit Item: " + it.title;
+  }
+
+  function deleteItem(id) {
+    if (!confirm("Remove this listing?")) return;
+    items.splice(items.indexOf(findById(items, id)), 1);
+    refresh();
+  }
+
+  // ---------- Negotiation ----------
+  function makeOffer(id) {
+    var it = findById(items, id);
+    var amount = parseInt(el("offerAmount").value);
+    if (isNaN(amount) || amount <= 0 || amount >= it.price) {
+      alert("Your offer must be lower than the asking price of " + money(it.price));
+      return;
+    }
+    offers.push({ id: nextOfferId++, itemId: id, buyer: currentUser.username, amount: amount, status: "Pending" });
+    notify(it.seller, userName(currentUser.username) + " offered " + money(amount) + " for " + it.title);
+    alert("Offer sent to the seller");
+    refresh();
+  }
+
+  function showOffers() {
+    var rec = "<tr><th>Item</th><th>Buyer</th><th>Asking</th><th>Offer</th><th>Status</th><th>Action</th></tr>";
+    var sent = "<tr><th>Item</th><th>Asking</th><th>My Offer</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < offers.length; i++) {
+      var o = offers[i];
+      var it = findById(items, o.itemId);
+      if (!it) continue;
+      if (it.seller == currentUser.username) {
+        rec += "<tr><td>" + it.title + "</td><td>" + userName(o.buyer) + "</td><td>" + money(it.price) + "</td><td>" + money(o.amount) + "</td><td>" + badge(o.status) + "</td><td>";
+        if (o.status == "Pending" && it.status == "Available") rec += "<button onclick='answerOffer(" + o.id + ", \"Accepted\")'>Accept</button><button onclick='answerOffer(" + o.id + ", \"Rejected\")'>Reject</button>";
+        rec += "</td></tr>";
+      }
+      if (o.buyer == currentUser.username) {
+        sent += "<tr><td>" + it.title + "</td><td>" + money(it.price) + "</td><td>" + money(o.amount) + "</td><td>" + badge(o.status) + "</td><td>";
+        if (o.status == "Accepted" && it.status == "Available") sent += "<button onclick='startBuy(" + it.id + ", " + o.amount + ")'>Buy</button>";
+        sent += "</td></tr>";
+      }
+    }
+    el("receivedTable").innerHTML = rec;
+    el("sentTable").innerHTML = sent;
+  }
+
+  function answerOffer(id, status) {
+    var o = findById(offers, id);
+    o.status = status;
+    notify(o.buyer, "Your offer for " + findById(items, o.itemId).title + " was " + status.toLowerCase());
+    refresh();
+  }
+
+  // ---------- Buying ----------
+  function startBuy(id, price) {
+    buyItem = findById(items, id);
+    buyPrice = price;
+    el("buySummary").innerHTML = "<b>" + buyItem.title + "</b><br>Seller: " + userName(buyItem.seller) + "<br>Price to pay: <b>" + money(price) + "</b>";
+    el("bMethod").innerHTML = "<option>Delivery</option><option>Pick-up</option>";
+    if (buyItem.delivery == "Pick-up only") el("bMethod").innerHTML = "<option>Pick-up</option>";
+    if (buyItem.delivery == "Delivery only") el("bMethod").innerHTML = "<option>Delivery</option>";
+    el("buyMsg").innerText = "";
+    toggleAddress();
+    hide("userBox");
+    show("buyBox");
+  }
+
+  function toggleAddress() {
+    el("bAddress").style.display = el("bMethod").value == "Delivery" ? "block" : "none";
+  }
+
+  function confirmBuy() {
+    var method = el("bMethod").value;
+    if (method == "Delivery" && el("bAddress").value == "") {
+      el("buyMsg").innerText = "Please enter the delivery address";
+      return;
+    }
+    if (buyItem.status != "Available") {
+      el("buyMsg").innerText = "Sorry, this item is no longer available";
+      return;
+    }
+    buyItem.status = "Sold";
+    var order = {
+      id: nextOrderId++, itemId: buyItem.id, title: buyItem.title, buyer: currentUser.username, seller: buyItem.seller, price: buyPrice,
+      method: method, address: method == "Delivery" ? el("bAddress").value : "Pick-up from " + buyItem.location, payment: el("bPay").value, date: today(), status: "Paid"
+    };
+    orders.push(order);
+    notify(buyItem.seller, "Your item " + buyItem.title + " was bought for " + money(buyPrice));
+    notify(currentUser.username, "Order #" + order.id + " placed for " + buyItem.title);
+    el("bAddress").value = "";
+    alert("Payment successful! Order ID: " + order.id);
+    hide("buyBox");
+    show("userBox");
+    openTab("userBox", "uBuys");
+  }
+
+  function showPurchases() {
+    var html = "<tr><th>Order</th><th>Item</th><th>Seller</th><th>Price</th><th>Method</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < orders.length; i++) {
+      var o = orders[i];
+      if (o.buyer == currentUser.username) {
+        html += "<tr><td>#" + o.id + "<br><small>" + o.date + "</small></td><td>" + o.title + "</td><td>" + userName(o.seller) + "</td><td>" + money(o.price) +
+          "</td><td>" + o.method + "<br><small>" + o.address + "</small></td><td>" + badge(o.status) + "</td><td>";
+        if (o.status == "Received" && !o.rated) html += "<button onclick='leaveFeedback(" + o.id + ")'>Rate Seller</button>";
+        html += "</td></tr>";
+      }
+    }
+    el("buyTable").innerHTML = html;
+  }
+
+  function leaveFeedback(id) {
+    var o = findById(orders, id);
+    var rating = parseInt(prompt("Rate the seller from 1 to 5", "5"));
+    if (isNaN(rating) || rating < 1 || rating > 5) {
+      alert("Rating must be between 1 and 5");
+      return;
+    }
+    feedbacks.push({ orderId: id, seller: o.seller, buyer: o.buyer, rating: rating, text: prompt("Write a short comment", "") || "" });
+    o.rated = true;
+    notify(o.seller, "You received a " + rating + " star rating for " + o.title);
+    refresh();
+  }
+
+  function showSales() {
+    var html = "<tr><th>Order</th><th>Item</th><th>Buyer</th><th>Price</th><th>Method</th><th>Status</th></tr>";
+    for (var i = 0; i < orders.length; i++) {
+      var o = orders[i];
+      if (o.seller == currentUser.username) {
+        html += "<tr><td>#" + o.id + "</td><td>" + o.title + "</td><td>" + userName(o.buyer) + "</td><td>" + money(o.price) + "</td><td>" + o.method + "<br><small>" + o.address + "</small></td><td>" + badge(o.status) + "</td></tr>";
+      }
+    }
+    el("saleTable").innerHTML = html;
+  }
+
+  function showNotes() {
+    var html = "<tr><th>Date</th><th>Message</th></tr>";
+    for (var i = notes.length - 1; i >= 0; i--) {
+      if (notes[i].user == currentUser.username) html += "<tr><td>" + notes[i].date + "</td><td>🔔 " + notes[i].text + "</td></tr>";
+    }
+    el("noteTable").innerHTML = html;
+  }
+
+  function showUserStats() {
+    var listed = 0, bought = 0, sold = 0;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].seller == currentUser.username) listed++;
+    }
+    for (var j = 0; j < orders.length; j++) {
+      if (orders[j].buyer == currentUser.username) bought++;
+      if (orders[j].seller == currentUser.username) sold++;
+    }
+    el("userStats").innerHTML = statBox("s1", listed, "My Listings") + statBox("s2", bought, "Purchases") + statBox("s3", sold, "Items Sold");
+  }
+
+  // ---------- Admin ----------
+  function showAdminStats() {
+    var members = 0, money1 = 0;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "user") members++;
+    }
+    for (var j = 0; j < orders.length; j++) money1 += orders[j].price;
+    el("adminStats").innerHTML = statBox("s1", members, "Users") + statBox("s2", items.length, "Commodities") + statBox("s3", orders.length, "Orders") + statBox("s4", money(money1), "Trade Value");
+  }
+
+  function saveUser() {
+    var name = el("uName").value;
+    var user = el("uUser").value;
+    var pass = el("uPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("userMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (editUserName == "") {
+      if (findUser(user)) {
+        el("userMsg").innerText = "Username already exists";
+        return;
+      }
+      users.push({ name: name, username: user, password: pass, role: "user", city: el("uCity").value });
+    } else {
+      var u = findUser(editUserName);
+      u.name = name;
+      u.password = pass;
+      u.city = el("uCity").value;
+    }
+    clearUserForm();
+    refresh();
+  }
+
+  function clearUserForm() {
+    var ids = ["uName", "uUser", "uPass", "uCity"];
+    for (var i = 0; i < ids.length; i++) el(ids[i]).value = "";
+    el("uUser").disabled = false;
+    editUserName = "";
+    el("userMsg").innerText = "";
+    el("userFormTitle").innerText = "Add User (set login account)";
+  }
+
+  function showUsers() {
+    var html = "<tr><th>Name</th><th>Username</th><th>City</th><th>Action</th></tr>";
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].role == "user") {
+        html += "<tr><td>" + users[i].name + "</td><td>" + users[i].username + "</td><td>" + users[i].city +
+          "</td><td><button onclick='editUser(\"" + users[i].username + "\")'>Edit</button><button onclick='deleteUser(\"" + users[i].username + "\")'>Delete</button></td></tr>";
+      }
+    }
+    el("userTable").innerHTML = html;
+  }
+
+  function editUser(username) {
+    var u = findUser(username);
+    editUserName = username;
+    el("uName").value = u.name;
+    el("uUser").value = u.username;
+    el("uUser").disabled = true;
+    el("uPass").value = u.password;
+    el("uCity").value = u.city;
+    el("userFormTitle").innerText = "Edit User: " + u.name;
+  }
+
+  function deleteUser(username) {
+    if (!confirm("Delete this user?")) return;
+    users.splice(users.indexOf(findUser(username)), 1);
+    refresh();
+  }
+
+  function addCategory() {
+    var name = el("catName").value;
+    if (name == "" || categories.indexOf(name) != -1) {
+      alert("Enter a new category name");
+      return;
+    }
+    categories.push(name);
+    el("catName").value = "";
+    refresh();
+  }
+
+  function showCategories() {
+    var html = "<tr><th>Category</th><th>Items</th><th>Action</th></tr>";
+    for (var i = 0; i < categories.length; i++) {
+      var count = 0;
+      for (var j = 0; j < items.length; j++) {
+        if (items[j].category == categories[i]) count++;
+      }
+      html += "<tr><td>" + categories[i] + "</td><td>" + count + "</td><td><button onclick='deleteCategory(" + i + ")'>Delete</button></td></tr>";
+    }
+    el("catTable").innerHTML = html;
+  }
+
+  function deleteCategory(i) {
+    for (var j = 0; j < items.length; j++) {
+      if (items[j].category == categories[i]) {
+        alert("This category has items. Delete or move the items first.");
+        return;
+      }
+    }
+    categories.splice(i, 1);
+    refresh();
+  }
+
+  function showAdminItems() {
+    var html = "<tr><th>Item</th><th>Seller</th><th>Category</th><th>Price</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      html += "<tr><td>" + it.title + "</td><td>" + userName(it.seller) + "</td><td>" + it.category + "</td><td>" + money(it.price) + "</td><td>" + badge(it.status) +
+        "</td><td><button onclick='adminEditItem(" + it.id + ")'>Edit</button><button onclick='adminDeleteItem(" + it.id + ")'>Delete</button></td></tr>";
+    }
+    el("adminItemTable").innerHTML = html;
+  }
+
+  function adminEditItem(id) {
+    var it = findById(items, id);
+    var title = prompt("Item title", it.title);
+    var price = parseInt(prompt("Price (Rs)", it.price));
+    var desc = prompt("Description", it.desc);
+    if (title) it.title = title;
+    if (!isNaN(price) && price > 0) it.price = price;
+    if (desc !== null) it.desc = desc;
+    refresh();
+  }
+
+  function adminDeleteItem(id) {
+    if (!confirm("Delete this commodity?")) return;
+    items.splice(items.indexOf(findById(items, id)), 1);
+    refresh();
+  }
+
+  function showAdminOrders() {
+    var html = "<tr><th>Order</th><th>Item</th><th>Buyer</th><th>Seller</th><th>Price</th><th>Logistics Status</th><th>Action</th></tr>";
+    for (var i = 0; i < orders.length; i++) {
+      var o = orders[i];
+      var options = "";
+      var list = ["Paid", "Shipped", "Received"];
+      for (var j = 0; j < list.length; j++) options += "<option" + (list[j] == o.status ? " selected" : "") + ">" + list[j] + "</option>";
+      html += "<tr><td>#" + o.id + "</td><td>" + o.title + "</td><td>" + userName(o.buyer) + "</td><td>" + userName(o.seller) + "</td><td>" + money(o.price) +
+        "</td><td><select id='st" + o.id + "' style='width:130px'>" + options + "</select></td><td><button onclick='updateOrder(" + o.id + ")'>Update</button>" +
+        "<button onclick='deleteOrder(" + o.id + ")'>Delete</button></td></tr>";
+    }
+    el("adminOrderTable").innerHTML = html;
+  }
+
+  function updateOrder(id) {
+    var o = findById(orders, id);
+    o.status = el("st" + id).value;
+    notify(o.buyer, "Your order #" + id + " (" + o.title + ") is now: " + o.status);
+    notify(o.seller, "Order #" + id + " (" + o.title + ") is now: " + o.status);
+    alert("Order status updated");
+    refresh();
+  }
+
+  function deleteOrder(id) {
+    if (!confirm("Delete this order?")) return;
+    orders.splice(orders.indexOf(findById(orders, id)), 1);
+    refresh();
+  }
+</script>
+
+</body>
+</html>

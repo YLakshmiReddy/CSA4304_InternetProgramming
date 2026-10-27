@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wanderlust Travels</title>
+<style>
+
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #dfe9f6, #f6f9fd 60%, #e9f0fb); margin: 0; color: #2d3436; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: linear-gradient(90deg, #141e30, #243b55); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+  header p { margin: 4px 0 0; font-size: 13px; color: #b8c6db; }
+  #logoutBtn { position: absolute; right: 20px; top: 22px; background: #e74c3c; }
+  #logoutBtn:hover { background: #c0392b; }
+  main { flex: 1; }
+  footer { text-align: center; padding: 14px; font-size: 13px; color: #7f8c8d; }
+
+  .box { background: white; width: 92%; max-width: 900px; margin: 28px auto; padding: 28px; border-radius: 14px; box-shadow: 0 8px 24px rgba(20,30,48,0.15); animation: fadeIn 0.5s ease; border-top: 5px solid #2a5298; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  h2 { margin-top: 0; color: #141e30; padding-bottom: 10px; border-bottom: 2px solid #e8eef6; }
+  h3 { color: #2a5298; margin: 18px 0 8px; }
+
+  input, select { padding: 10px 12px; margin: 5px 6px 5px 0; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; width: 230px; max-width: 100%; background: #fafcff; transition: 0.2s; }
+  input:focus, select:focus { outline: none; border-color: #2a5298; background: white; box-shadow: 0 0 0 3px rgba(42,82,152,0.2); }
+  button { padding: 10px 18px; margin: 5px 6px 5px 0; background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s; box-shadow: 0 2px 5px rgba(42,82,152,0.35); }
+  button:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(42,82,152,0.4); }
+
+  nav { margin: 14px 0 18px; padding-bottom: 12px; border-bottom: 1px solid #e8eef6; }
+  nav button { background: #eaf0f8; color: #243b55; box-shadow: none; }
+  nav button:hover { background: #d5e2f5; }
+  nav button.active { background: linear-gradient(135deg, #2a5298, #3a6fd0); color: white; }
+
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 5px; }
+  .stat { flex: 1; min-width: 150px; padding: 16px; border-radius: 12px; color: white; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .stat b { display: block; font-size: 28px; }
+  .stat span { font-size: 13px; opacity: 0.9; }
+  .s1 { background: linear-gradient(135deg, #2193b0, #6dd5ed); }
+  .s2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .s3 { background: linear-gradient(135deg, #f7971e, #ffb347); }
+  .s4 { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  th { background: #1c2b45; color: white; padding: 12px 10px; text-align: left; }
+  td { padding: 10px; border-bottom: 1px solid #eef2f7; }
+  tr:nth-child(even) td { background: #f7faff; }
+  tr:hover td { background: #e8f0fc; }
+  td button { padding: 6px 12px; font-size: 13px; }
+  td button:last-child:not(:only-child) { background: linear-gradient(135deg, #cb2d3e, #ef473a); box-shadow: none; }
+
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+  .green { background: #27ae60; }
+  .orange { background: #f39c12; }
+  .red { background: #e74c3c; }
+
+  .hidden { display: none; }
+  .msg { color: #e74c3c; font-weight: bold; min-height: 18px; }
+  .hint { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; font-size: 13px; margin-top: 12px; border-radius: 6px; }
+  .profile { background: #f4f8ff; padding: 18px; border-radius: 10px; line-height: 2; font-size: 16px; border-left: 4px solid #2a5298; }
+  #totalFine { color: #c0392b; }
+
+  #loginBox, #registerBox { max-width: 430px; }
+  #loginBox input, #loginBox select, #registerBox input { width: 100%; }
+  .icon { font-size: 44px; text-align: center; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 20px; }
+    #logoutBtn { position: static; margin-top: 8px; }
+    table { font-size: 12px; }
+  }
+
+  .seats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .seats button { width: 52px; padding: 8px 0; margin: 0; background: #dfe9f6; color: #243b55; box-shadow: none; }
+  .seats button.picked { background: #27ae60; color: white; }
+  .seats button.taken { background: #e74c3c; color: white; cursor: not-allowed; opacity: 0.7; }
+  .ticket { border: 2px dashed #2a5298; border-radius: 12px; padding: 16px; background: #f8fbff; line-height: 1.8; margin-top: 12px; }
+  textarea { width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  .photo { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .info { background: #f4f8ff; padding: 16px; border-radius: 10px; border-left: 4px solid #2a5298; line-height: 1.7; margin-top: 10px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .ticket, .ticket * { visibility: visible; }
+    .ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-top: 12px; }
+  .card { border: 1px solid #e1e8f0; border-radius: 12px; padding: 14px; text-align: center; background: #fbfdff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: 0.2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .card .pic { font-size: 54px; height: 70px; }
+  .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+  .card h4 { margin: 8px 0 4px; color: #141e30; }
+  .card button { padding: 6px 10px; font-size: 13px; margin: 3px 2px; }
+  .price { color: #27ae60; font-weight: bold; font-size: 16px; }
+  .old { color: #999; text-decoration: line-through; font-size: 13px; }
+  .chip { display: inline-block; background: #eaf0f8; color: #243b55; padding: 4px 12px; margin: 3px; border-radius: 14px; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #2a5298; color: white; }
+  .map { width: 100%; height: 260px; border: 0; border-radius: 10px; margin-top: 10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌍 Wanderlust Travels</h1>
+  <p>Plan your trip: places, food, stay and routes</p>
+  <button id="logoutBtn" class="hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+<!-- Login -->
+<div id="loginBox" class="box">
+  <div class="icon">🔐</div>
+  <h2>Login</h2>
+  <select id="role">
+    <option value="user">Traveller (User)</option>
+    <option value="admin">Admin</option>
+  </select><br>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="hide('loginBox'); show('registerBox')">Register</button>
+  <p class="msg" id="loginMsg"></p>
+  <div class="hint">Admin: admin / admin123<br>Traveller: traveller / 1234</div>
+</div>
+
+<!-- Register -->
+<div id="registerBox" class="box hidden">
+  <div class="icon">📝</div>
+  <h2>Register</h2>
+
+  <input type="text" id="regName" placeholder="Full name"><br>
+  <input type="text" id="regUser" placeholder="Username"><br>
+  <input type="password" id="regPass" placeholder="Password"><br>
+  <input type="text" id="regPhone" placeholder="Phone number"><br>
+  <button onclick="register()">Register</button>
+  <button onclick="hide('registerBox'); show('loginBox')">Back</button>
+  <p class="msg" id="regMsg"></p>
+</div>
+
+
+<!-- User dashboard -->
+<div id="userBox" class="box hidden">
+  <h2>🧳 Traveller Dashboard</h2>
+  <div class="stats" id="userStats"></div>
+  <nav>
+    <button onclick="openTab('userBox','uPlaces')">🏝️ Destinations</button>
+    <button onclick="openTab('userBox','uFood')">🍽️ Food Details</button>
+    <button onclick="openTab('userBox','uHostel')">🏨 Hostel Details</button>
+    <button onclick="openTab('userBox','uRoute')">🛣️ Route Details</button>
+    <button onclick="openTab('userBox','uBookings')">📖 My Bookings</button>
+  </nav>
+
+  <div id="uPlaces" class="tab">
+    <h3>Tourism Details</h3>
+    <input type="text" id="placeSearch" placeholder="Search destination" oninput="showUserLists()">
+    <div class="grid" id="placeGrid"></div>
+  </div>
+
+  <div id="uFood" class="tab hidden">
+    <h3>Food Details</h3>
+    <input type="text" id="foodSearch" placeholder="Search by dish or destination" oninput="showUserLists()">
+    <table id="foodTable"></table>
+  </div>
+
+  <div id="uHostel" class="tab hidden">
+    <h3>Hostel and Hotel Details</h3>
+    <input type="text" id="hotelSearch" placeholder="Search by name or destination" oninput="showUserLists()">
+    <table id="hotelTable"></table>
+    <div id="bookBox" class="hidden info">
+      <h3 id="bookTitle"></h3>
+      Check-in: <input type="date" id="bDate" style="width:160px" onchange="showTotal()">
+      Nights: <input type="number" id="bNights" value="1" min="1" style="width:90px" onchange="showTotal()">
+      Guests: <input type="number" id="bGuests" value="1" min="1" style="width:90px">
+      <p><b id="bTotal"></b></p>
+      <button onclick="bookRoom()">Book Accommodation</button>
+      <button onclick="hide('bookBox')">Close</button>
+      <p class="msg" id="bookMsg"></p>
+    </div>
+  </div>
+
+  <div id="uRoute" class="tab hidden">
+    <h3>Route Details</h3>
+    <input type="text" id="routeSearch" placeholder="Search by place" oninput="showUserLists()">
+    <table id="routeTable"></table>
+  </div>
+
+  <div id="uBookings" class="tab hidden">
+    <h3>My Accommodation Bookings</h3>
+    <table id="myBookingTable"></table>
+  </div>
+</div>
+
+<!-- Admin dashboard -->
+<div id="adminBox" class="box hidden">
+  <h2>🛠️ Admin Panel</h2>
+  <div class="stats" id="adminStats"></div>
+  <nav>
+    <button onclick="openTab('adminBox','aTourism')">🏝️ Tourism Details</button>
+    <button onclick="openTab('adminBox','aFood')">🍽️ Food Details</button>
+    <button onclick="openTab('adminBox','aHotel')">🏨 Hotel Details</button>
+    <button onclick="openTab('adminBox','aRoute')">🛣️ Route Details</button>
+    <button onclick="openTab('adminBox','aBookings')">📋 Booking Details</button>
+  </nav>
+
+  <div id="aTourism" class="tab"><h3>Post Tourism Details</h3><div id="form_places"></div><p class="msg" id="msg_places"></p><table id="table_places"></table></div>
+  <div id="aFood" class="tab hidden"><h3>Manage Food Details</h3><div id="form_food"></div><p class="msg" id="msg_food"></p><table id="table_food"></table></div>
+  <div id="aHotel" class="tab hidden"><h3>Manage Hotel Details</h3><div id="form_hotels"></div><p class="msg" id="msg_hotels"></p><table id="table_hotels"></table></div>
+  <div id="aRoute" class="tab hidden"><h3>Manage Route Details</h3><div id="form_routes"></div><p class="msg" id="msg_routes"></p><table id="table_routes"></table></div>
+
+  <div id="aBookings" class="tab hidden">
+    <h3>All Booking Details</h3>
+    <table id="allBookingTable"></table>
+  </div>
+</div>
+
+
+</main>
+
+<footer>© 2026 Wanderlust Travels | Internet Programming Lab</footer>
+
+<script>
+  // ---------- Data ----------
+  var users = [
+    { name: "Travel Admin", username: "admin", password: "admin123", role: "admin", phone: "" },
+    { name: "Test Traveller", username: "traveller", password: "1234", role: "user", phone: "9876543210" }
+  ];
+  var currentUser = null;
+  var BOXES = ["userBox", "adminBox"];
+
+  // ---------- Helpers ----------
+  function el(id) { return document.getElementById(id); }
+  function show(id) { el(id).classList.remove("hidden"); }
+  function hide(id) { el(id).classList.add("hidden"); }
+  function today() { return new Date().toISOString().split("T")[0]; }
+  function money(n) { return "Rs " + n.toLocaleString("en-IN"); }
+
+  function statBox(cls, num, text) {
+    return "<div class='stat " + cls + "'><b>" + num + "</b><span>" + text + "</span></div>";
+  }
+
+  function findById(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id == id) return list[i];
+    }
+  }
+
+  function findUser(username) {
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == username) return users[i];
+    }
+  }
+
+  function badge(text) {
+    var color = "orange";
+    if (/^(Approved|Active|Resolved|Completed|Confirmed|Available|Delivered|Paid|Open|Shortlisted|Selected|Done|Collected|Voted)$/.test(text)) color = "green";
+    if (/^(Rejected|Cancelled|Closed|Pending Payment Due|Full|Overdue|Unpaid|Declined|Removed)$/.test(text)) color = "red";
+    return "<span class='badge " + color + "'>" + text + "</span>";
+  }
+
+  function openTab(box, id) {
+    var tabs = el(box).getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.add("hidden");
+    show(id);
+    var btns = el(box).getElementsByTagName("nav")[0].getElementsByTagName("button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.remove("active");
+      if (btns[j].getAttribute("onclick").indexOf("'" + id + "'") != -1) btns[j].classList.add("active");
+    }
+    refresh();
+  }
+
+  function mapHtml(query) {
+    var q = encodeURIComponent(query);
+    return "<iframe class='map' src='https://maps.google.com/maps?q=" + q + "&output=embed'></iframe>" +
+      "<p><a href='https://www.google.com/maps/search/?api=1&query=" + q + "' target='_blank'>Open in Google Maps</a></p>";
+  }
+
+  // ---------- Login / Register ----------
+  function login() {
+    var u = el("loginUser").value;
+    var p = el("loginPass").value;
+    var r = el("role").value;
+    for (var i = 0; i < users.length; i++) {
+      if (users[i].username == u && users[i].password == p && users[i].role == r) {
+        if (typeof canLogin == "function") {
+          var block = canLogin(users[i]);
+          if (block != "") {
+            el("loginMsg").innerText = block;
+            return;
+          }
+        }
+        currentUser = users[i];
+        hide("loginBox");
+        show("logoutBtn");
+        startSession(r);
+        return;
+      }
+    }
+    el("loginMsg").innerText = "Invalid username or password";
+  }
+
+  function register() {
+    var name = el("regName").value;
+    var user = el("regUser").value;
+    var pass = el("regPass").value;
+    if (name == "" || user == "" || pass == "") {
+      el("regMsg").innerText = "Please fill name, username and password";
+      return;
+    }
+    if (findUser(user)) {
+      el("regMsg").innerText = "Username already exists";
+      return;
+    }
+    var account = { name: name, username: user, password: pass, role: "user" };
+    account.phone = el("regPhone").value;
+    if (typeof checkRegistration == "function") {
+      var problem = checkRegistration(account);
+      if (problem != "") {
+        el("regMsg").innerText = problem;
+        return;
+      }
+    }
+    users.push(account);
+    if (typeof afterRegister == "function") afterRegister(account);
+    alert("Registration successful. Please login.");
+    hide("registerBox");
+    show("loginBox");
+  }
+
+  function logout() {
+    currentUser = null;
+    for (var i = 0; i < BOXES.length; i++) hide(BOXES[i]);
+    hide("logoutBtn");
+    show("loginBox");
+    el("loginUser").value = "";
+    el("loginPass").value = "";
+    el("loginMsg").innerText = "";
+  }
+
+
+  // ---------- Data ----------
+  var data = {
+    places: [
+      { id: 1, name: "Munnar", region: "Kerala, India", season: "September to March", desc: "Tea gardens, misty hills and waterfalls." },
+      { id: 2, name: "Goa", region: "Goa, India", season: "November to February", desc: "Beaches, old churches and nightlife." },
+      { id: 3, name: "Jaipur", region: "Rajasthan, India", season: "October to March", desc: "The pink city with forts and palaces." }
+    ],
+    food: [
+      { id: 1, name: "Appam with Stew", destination: "Munnar", price: 180, type: "Veg", desc: "Soft rice pancakes with coconut milk stew." },
+      { id: 2, name: "Goan Fish Curry", destination: "Goa", price: 320, type: "Non-Veg", desc: "Spicy coconut curry with fresh fish." },
+      { id: 3, name: "Dal Baati Churma", destination: "Jaipur", price: 250, type: "Veg", desc: "Traditional Rajasthani platter." }
+    ],
+    hotels: [
+      { id: 1, name: "Misty Hills Hostel", destination: "Munnar", price: 900, rooms: 6, rating: 4, desc: "Budget hostel with mountain view." },
+      { id: 2, name: "Sunset Beach Resort", destination: "Goa", price: 3200, rooms: 4, rating: 5, desc: "Beachside resort with a pool." },
+      { id: 3, name: "Pink City Haveli", destination: "Jaipur", price: 2400, rooms: 5, rating: 4, desc: "Heritage hotel near the City Palace." }
+    ],
+    routes: [
+      { id: 1, from: "Chennai", to: "Munnar", mode: "Bus", duration: "12 hours", price: 1100, desc: "Overnight bus via Theni." },
+      { id: 2, from: "Chennai", to: "Goa", mode: "Flight", duration: "1 hr 40 min", price: 5200, desc: "Direct flight to Dabolim airport." },
+      { id: 3, from: "Chennai", to: "Jaipur", mode: "Train", duration: "30 hours", price: 1800, desc: "Express train with AC coaches." }
+    ]
+  };
+
+  // fields of every list the admin can manage: [key, placeholder, type]
+  var SCHEMA = {
+    places: [["name", "Destination name"], ["region", "State / Country"], ["season", "Best season"], ["desc", "Description"]],
+    food: [["name", "Dish name"], ["destination", "Destination"], ["price", "Price (Rs)", "number"], ["type", "Veg / Non-Veg"], ["desc", "Description"]],
+    hotels: [["name", "Hotel / Hostel name"], ["destination", "Destination"], ["price", "Price per night (Rs)", "number"], ["rooms", "Rooms", "number"], ["rating", "Rating (1 to 5)", "number"], ["desc", "Description"]],
+    routes: [["from", "From"], ["to", "To (destination)"], ["mode", "Flight / Train / Bus / Car"], ["duration", "Duration"], ["price", "Fare (Rs)", "number"], ["desc", "Description"]]
+  };
+
+  var bookings = [];
+  var nextId = { places: 4, food: 4, hotels: 4, routes: 4 };
+  var editing = { places: 0, food: 0, hotels: 0, routes: 0 };
+  var nextBookingId = 6001;
+  var selectedHotel = null;
+
+  function startSession(role) {
+    if (role == "admin") {
+      buildForms();
+      show("adminBox");
+      openTab("adminBox", "aTourism");
+    } else {
+      show("userBox");
+      openTab("userBox", "uPlaces");
+    }
+  }
+
+  function refresh() {
+    if (currentUser == null) return;
+    if (currentUser.role == "admin") {
+      showAdminStats();
+      for (var name in SCHEMA) showTable(name);
+      showAllBookings();
+    } else {
+      showUserStats();
+      showUserLists();
+      showMyBookings();
+    }
+  }
+
+  // ---------- Admin: one add / update / delete manager for every list ----------
+  function buildForms() {
+    for (var name in SCHEMA) {
+      if (el("form_" + name).innerHTML != "") continue;
+      var html = "";
+      for (var i = 0; i < SCHEMA[name].length; i++) {
+        var f = SCHEMA[name][i];
+        html += "<input type='" + (f[2] || "text") + "' id='f_" + name + "_" + f[0] + "' placeholder='" + f[1] + "'> ";
+      }
+      html += "<br><button onclick='saveItem(\"" + name + "\")'>Save</button><button onclick='clearForm(\"" + name + "\")'>Clear</button>";
+      el("form_" + name).innerHTML = html;
+    }
+  }
+
+  function saveItem(name) {
+    var item = {};
+    for (var i = 0; i < SCHEMA[name].length; i++) {
+      var f = SCHEMA[name][i];
+      var value = el("f_" + name + "_" + f[0]).value;
+      if (value == "" && f[0] != "desc") {
+        el("msg_" + name).innerText = "Please fill " + f[1];
+        return;
+      }
+      item[f[0]] = f[2] == "number" ? parseInt(value) : value;
+    }
+    if (editing[name] == 0) {
+      item.id = nextId[name]++;
+      data[name].push(item);
+    } else {
+      item.id = editing[name];
+      data[name][data[name].indexOf(findById(data[name], editing[name]))] = item;
+    }
+    clearForm(name);
+    refresh();
+  }
+
+  function clearForm(name) {
+    for (var i = 0; i < SCHEMA[name].length; i++) el("f_" + name + "_" + SCHEMA[name][i][0]).value = "";
+    editing[name] = 0;
+    el("msg_" + name).innerText = "";
+  }
+
+  function editItem(name, id) {
+    var item = findById(data[name], id);
+    editing[name] = id;
+    for (var i = 0; i < SCHEMA[name].length; i++) el("f_" + name + "_" + SCHEMA[name][i][0]).value = item[SCHEMA[name][i][0]];
+    el("msg_" + name).innerText = "Editing the selected row. Press Save to update it.";
+  }
+
+  function deleteItem(name, id) {
+    if (!confirm("Delete this record?")) return;
+    data[name].splice(data[name].indexOf(findById(data[name], id)), 1);
+    refresh();
+  }
+
+  function showTable(name) {
+    var html = "<tr>";
+    for (var i = 0; i < SCHEMA[name].length; i++) html += "<th>" + SCHEMA[name][i][1] + "</th>";
+    html += "<th>Action</th></tr>";
+    for (var j = 0; j < data[name].length; j++) {
+      var item = data[name][j];
+      html += "<tr>";
+      for (var k = 0; k < SCHEMA[name].length; k++) html += "<td>" + item[SCHEMA[name][k][0]] + "</td>";
+      html += "<td><button onclick='editItem(\"" + name + "\", " + item.id + ")'>Update</button><button onclick='deleteItem(\"" + name + "\", " + item.id + ")'>Delete</button></td></tr>";
+    }
+    el("table_" + name).innerHTML = html;
+  }
+
+  function showAdminStats() {
+    var money1 = 0;
+    for (var i = 0; i < bookings.length; i++) {
+      if (bookings[i].status == "Booked") money1 += bookings[i].total;
+    }
+    el("adminStats").innerHTML = statBox("s1", data.places.length, "Destinations") + statBox("s2", data.hotels.length, "Hotels") + statBox("s3", bookings.length, "Bookings") + statBox("s4", money(money1), "Booking Value");
+  }
+
+  function showAllBookings() {
+    var html = "<tr><th>ID</th><th>Traveller</th><th>Hotel</th><th>Check-in</th><th>Nights</th><th>Guests</th><th>Total</th><th>Status</th></tr>";
+    for (var i = 0; i < bookings.length; i++) {
+      var b = bookings[i];
+      html += "<tr><td>#" + b.id + "</td><td>" + findUser(b.user).name + "</td><td>" + b.hotelName + "</td><td>" + b.date + "</td><td>" + b.nights + "</td><td>" + b.guests + "</td><td>" + money(b.total) + "</td><td>" +
+        badge(b.status == "Booked" ? "Confirmed" : "Cancelled") + "</td></tr>";
+    }
+    el("allBookingTable").innerHTML = html;
+  }
+
+  // ---------- User ----------
+  function matches(item, text) {
+    return JSON.stringify(item).toLowerCase().indexOf(text.toLowerCase()) != -1;
+  }
+
+  function showUserLists() {
+    if (currentUser == null || currentUser.role == "admin") return;
+    var i, html;
+    html = "";
+    for (i = 0; i < data.places.length; i++) {
+      var p = data.places[i];
+      if (matches(p, el("placeSearch").value)) {
+        html += "<div class='card'><div class='pic'>🏝️</div><h4>" + p.name + "</h4><small>" + p.region + "</small><br><small>Best time: " + p.season + "</small><p><small>" + p.desc + "</small></p></div>";
+      }
+    }
+    el("placeGrid").innerHTML = html;
+
+    html = "<tr><th>Dish</th><th>Destination</th><th>Type</th><th>Price</th><th>Description</th></tr>";
+    for (i = 0; i < data.food.length; i++) {
+      var f = data.food[i];
+      if (matches(f, el("foodSearch").value)) html += "<tr><td><b>" + f.name + "</b></td><td>" + f.destination + "</td><td>" + f.type + "</td><td>" + money(f.price) + "</td><td>" + f.desc + "</td></tr>";
+    }
+    el("foodTable").innerHTML = html;
+
+    html = "<tr><th>Hotel / Hostel</th><th>Destination</th><th>Price / Night</th><th>Rating</th><th>Rooms</th><th>Action</th></tr>";
+    for (i = 0; i < data.hotels.length; i++) {
+      var h = data.hotels[i];
+      if (matches(h, el("hotelSearch").value)) {
+        html += "<tr><td><b>" + h.name + "</b><br><small>" + h.desc + "</small></td><td>" + h.destination + "</td><td>" + money(h.price) + "</td><td>" + "⭐".repeat(Math.max(1, Math.min(5, h.rating))) +
+          "</td><td>" + h.rooms + "</td><td><button onclick='openBooking(" + h.id + ")'>Book</button></td></tr>";
+      }
+    }
+    el("hotelTable").innerHTML = html;
+
+    html = "<tr><th>From</th><th>To</th><th>Mode</th><th>Duration</th><th>Fare</th><th>Details</th></tr>";
+    for (i = 0; i < data.routes.length; i++) {
+      var r = data.routes[i];
+      if (matches(r, el("routeSearch").value)) html += "<tr><td>" + r.from + "</td><td>" + r.to + "</td><td>" + r.mode + "</td><td>" + r.duration + "</td><td>" + money(r.price) + "</td><td>" + r.desc + "</td></tr>";
+    }
+    el("routeTable").innerHTML = html;
+  }
+
+  function freeRooms(hotel, date, nights) {
+    var end = addDays(date, nights);
+    var used = 0;
+    for (var i = 0; i < bookings.length; i++) {
+      var b = bookings[i];
+      if (b.hotelId == hotel.id && b.status == "Booked" && b.date < end && addDays(b.date, b.nights) > date) used++;
+    }
+    return hotel.rooms - used;
+  }
+
+  function addDays(dateStr, n) {
+    var d = new Date(dateStr);
+    d.setDate(d.getDate() + n);
+    return d.toISOString().split("T")[0];
+  }
+
+  function openBooking(id) {
+    selectedHotel = findById(data.hotels, id);
+    el("bookTitle").innerText = "Book " + selectedHotel.name + " (" + money(selectedHotel.price) + " per night)";
+    el("bDate").min = today();
+    el("bookMsg").innerText = "";
+    show("bookBox");
+    showTotal();
+    el("bookBox").scrollIntoView();
+  }
+
+  function showTotal() {
+    var nights = parseInt(el("bNights").value);
+    el("bTotal").innerText = selectedHotel && nights > 0 ? "Total: " + nights + " night(s) x " + money(selectedHotel.price) + " = " + money(nights * selectedHotel.price) : "";
+  }
+
+  function bookRoom() {
+    var date = el("bDate").value;
+    var nights = parseInt(el("bNights").value);
+    var guests = parseInt(el("bGuests").value);
+    if (date == "" || date < today() || isNaN(nights) || nights < 1 || isNaN(guests) || guests < 1) {
+      el("bookMsg").innerText = "Choose a valid check-in date, nights and guests";
+      return;
+    }
+    if (freeRooms(selectedHotel, date, nights) <= 0) {
+      el("bookMsg").innerText = "Sorry, no rooms are free for these dates";
+      return;
+    }
+    bookings.push({ id: nextBookingId++, user: currentUser.username, hotelId: selectedHotel.id, hotelName: selectedHotel.name, destination: selectedHotel.destination, date: date, nights: nights, guests: guests, total: nights * selectedHotel.price, status: "Booked" });
+    alert("Accommodation booked at " + selectedHotel.name + ". Booking ID: " + (nextBookingId - 1));
+    hide("bookBox");
+    openTab("userBox", "uBookings");
+  }
+
+  function showMyBookings() {
+    var html = "<tr><th>ID</th><th>Hotel</th><th>Destination</th><th>Check-in</th><th>Nights</th><th>Guests</th><th>Total</th><th>Status</th><th>Action</th></tr>";
+    for (var i = 0; i < bookings.length; i++) {
+      var b = bookings[i];
+      if (b.user == currentUser.username) {
+        html += "<tr><td>#" + b.id + "</td><td>" + b.hotelName + "</td><td>" + b.destination + "</td><td>" + b.date + "</td><td>" + b.nights + "</td><td>" + b.guests + "</td><td>" + money(b.total) + "</td><td>" +
+          badge(b.status == "Booked" ? "Confirmed" : "Cancelled") + "</td><td>" + (b.status == "Booked" ? "<button onclick='cancelBooking(" + b.id + ")'>Cancel</button>" : "") + "</td></tr>";
+      }
+    }
+    el("myBookingTable").innerHTML = html;
+  }
+
+  function cancelBooking(id) {
+    if (!confirm("Cancel booking #" + id + "?")) return;
+    findById(bookings, id).status = "Cancelled";
+    refresh();
+  }
+
+  function showUserStats() {
+    var mine = 0, spent = 0;
+    for (var i = 0; i < bookings.length; i++) {
+      if (bookings[i].user == currentUser.username && bookings[i].status == "Booked") { mine++; spent += bookings[i].total; }
+    }
+    el("userStats").innerHTML = statBox("s1", data.places.length, "Destinations") + statBox("s2", mine, "My Bookings") + statBox("s3", money(spent), "Booking Amount");
+  }
+
+</script>
+
+</body>
+</html>
